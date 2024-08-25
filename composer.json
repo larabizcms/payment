@@ -1,0 +1,23 @@
+{
+    "name": "larabizcms/payment",
+    "description": "Payment support module for Larabiz CMS",
+    "authors": [
+        {
+            "name": "Dang The Anh",
+            "email": "admin@larabiz.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "LarabizCMS\\Modules\\Payment\\": ""
+        }
+    }
+}
