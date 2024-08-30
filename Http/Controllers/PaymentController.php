@@ -29,7 +29,7 @@ class PaymentController extends APIController
         try {
             $handler = Payment::getModule($module);
 
-            $response = $gateway->purchase($handler->options($driver, $request->all()))->send();
+            $response = $gateway->purchase($handler->options($driver, $request))->send();
         } catch (PaymentException $e) {
             return $this->restFail($e->getMessage());
         } catch (Exception $e) {
@@ -38,9 +38,9 @@ class PaymentController extends APIController
         }
 
         if ($response->isSuccessful()) {
-            event(new PaymentSuccess($module, $driver));
+            event(new PaymentSuccess($module, $driver, $request, $response));
 
-            $handler->success($response->getData());
+            $handler->success($driver, $request, $response);
 
             return $this->restSuccess([], __('Payment successful!'));
         }
@@ -54,8 +54,34 @@ class PaymentController extends APIController
             );
         }
 
-        $handler->fail($response->getData());
+        $handler->fail($driver, $request, $response);
 
+        return $this->restFail($response->getMessage());
+    }
+
+    public function complete(Request $request, string $module, string $driver): JsonResponse
+    {
+        $gateway = Omnipay::create($driver);
+
+        $gateway->initialize(config("payment.methods.{$driver}"));
+
+        try {
+            $handler = Payment::getModule($module);
+
+            $response = $gateway->completePurchase($request->all())->send();
+        } catch (PaymentException $e) {
+            return $this->restFail($e->getMessage());
+        } catch (Exception $e) {
+            report($e);
+            return $this->restFail(__('Sorry, there was an error processing your payment. Please try again later.'));
+        }
+
+        if ($response->isSuccessful()) {
+            $handler->success($driver, $request, $response);
+            return $this->restSuccess([], __('Payment successful!'));
+        }
+
+        $handler->fail($driver, $request, $response);
         return $this->restFail($response->getMessage());
     }
 }

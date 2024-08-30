@@ -1,6 +1,6 @@
 <?php
 
-use Illuminate\Http\Request;
+use LarabizCMS\Modules\Payment\Http\Controllers\PaymentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,6 +13,12 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::middleware('auth:api')->get('/payment', function (Request $request) {
-    return $request->user();
-});
+Route::group(
+    [
+        'prefix' => 'payment/{module}/{driver}',
+    ],
+    function () {
+        Route::post('purchase', [PaymentController::class, 'purchase']);
+        Route::match(['get', 'post'], 'complete', [PaymentController::class, 'complete']);
+    }
+);
