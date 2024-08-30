@@ -61,14 +61,6 @@ class Payment implements Contracts\Payment
             ]
         );
 
-        if (! isset($params['returnUrl'])) {
-            $params['returnUrl'] = route('api.payment.complete', [$module, $paymentHistory->id]);
-        }
-
-        if (! isset($params['cancelUrl'])) {
-            $params['cancelUrl'] = route('api.payment.cancel', [$module, $paymentHistory->id]);
-        }
-
         $gateway = Omnipay::create($driver);
 
         $gateway->initialize(config("payment.methods.{$driver}"));

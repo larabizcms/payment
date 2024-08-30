@@ -18,11 +18,8 @@ Route::group(
         'prefix' => 'payment',
     ],
     function () {
-        Route::post('{module}/purchase', [PaymentController::class, 'purchase'])
-            ->name('api.payment.purchase');
-        Route::match(['get', 'post'], '{module}/complete/{transactionId}', [PaymentController::class, 'complete'])
-            ->name('api.payment.complete');
-        Route::get('{module}/cancel/{transactionId}', [PaymentController::class, 'purchase'])
-            ->name('api.payment.cancel');
+        Route::post('{module}/purchase', [PaymentController::class, 'purchase']);
+        Route::match(['get', 'post'], '{module}/complete/{transactionId}', [PaymentController::class, 'complete']);
+        Route::get('{module}/cancel/{transactionId}', [PaymentController::class, 'purchase']);
     }
 );
