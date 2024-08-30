@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use LarabizCMS\Modules\Payment\Models\PaymentHistory;
 
 return new class extends Migration {
     /**
@@ -18,9 +19,9 @@ return new class extends Migration {
                 $table->uuid('id');
                 $table->string('module', 50)->index();
                 $table->morphs('payer');
-                $table->string('payment_id', 150);
+                $table->string('payment_id', 150)->nullable();
                 $table->string('payment_method', 50);
-                $table->string('status', 50)->default('success');
+                $table->string('status', 50)->default(PaymentHistory::STATUS_PROCESSING);
                 $table->json('data')->nullable();
                 $table->float('amount', 0, 0);
                 $table->timestamps();

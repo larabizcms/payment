@@ -60,11 +60,11 @@ class Payment implements Contracts\Payment
         );
 
         if (isset($params['returnUrl'])) {
-            $params['returnUrl'] = route('api.payment.complete', [$paymentHistory->id]);
+            $params['returnUrl'] = route('api.payment.complete', [$module, $paymentHistory->id]);
         }
 
         if (isset($params['cancelUrl'])) {
-            $params['cancelUrl'] = route('api.payment.cancel', [$paymentHistory->id]);
+            $params['cancelUrl'] = route('api.payment.cancel', [$module, $paymentHistory->id]);
         }
 
         $gateway = Omnipay::create($driver);
@@ -72,8 +72,8 @@ class Payment implements Contracts\Payment
         $gateway->initialize(config("payment.methods.{$driver}"));
 
         $response = $gateway->purchase($params)->send();
-
-        if ($response->isSuccessful()) {
+        
+        if ($response->isSuccessful() && ! $response->isRedirect()) {
             $paymentHistory->update(
                 [
                     'status' => PaymentHistory::STATUS_SUCCESS,
@@ -107,6 +107,8 @@ class Payment implements Contracts\Payment
         event(new PaymentFail($result));
 
         $handler->fail($result);
+
+        report($response->getMessage());
 
         return $result;
     }
@@ -147,6 +149,8 @@ class Payment implements Contracts\Payment
         $handler->fail($result);
 
         event(new PaymentFail($result));
+
+        report($response->getMessage());
 
         return $result;
     }

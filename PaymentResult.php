@@ -60,11 +60,21 @@ class PaymentResult
         return $this->status === PaymentHistory::STATUS_SUCCESS;
     }
 
+    public function isRedirect(): bool
+    {
+        return $this->isRedirect;
+    }
+
     public function setStatus(string $status): static
     {
         $this->status = $status;
 
         return $this;
+    }
+
+    public function getMessage(): ?string
+    {
+        return $this->response?->getMessage();
     }
 
     public function fill(array $params): static
