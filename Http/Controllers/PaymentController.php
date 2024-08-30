@@ -11,6 +11,7 @@ namespace LarabizCMS\Modules\Payment\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use LarabizCMS\Core\Http\Controllers\APIController;
 use LarabizCMS\Modules\Payment\Exceptions\PaymentException;
 use LarabizCMS\Modules\Payment\Facades\Payment;
@@ -76,7 +77,9 @@ class PaymentController extends APIController
         $driver = $request->input('driver');
 
         try {
-            $payment = Payment::create($request, $module, $driver);
+            $payment = DB::transaction(
+                fn () => Payment::create($request, $module, $driver)
+            );
         } catch (PaymentException $e) {
             return $this->restFail($e->getMessage());
         }
@@ -165,7 +168,7 @@ class PaymentController extends APIController
     public function complete(Request $request, string $module, string $transactionId): JsonResponse
     {
         try {
-            $payment = Payment::complete($request, $transactionId);
+            $payment = DB::transaction(fn () => Payment::complete($request, $transactionId));
         } catch (PaymentException $e) {
             return $this->restFail($e->getMessage());
         }
@@ -242,7 +245,7 @@ class PaymentController extends APIController
     public function cancel(Request $request, string $module, string $transactionId): JsonResponse
     {
         try {
-            $payment = Payment::cancel($request, $transactionId);
+            $payment = DB::transaction(fn () => Payment::cancel($request, $transactionId));
         } catch (PaymentException $e) {
             return $this->restFail($e->getMessage());
         }
