@@ -11,6 +11,7 @@ namespace LarabizCMS\Modules\Payment;
 
 use Illuminate\Http\Request;
 use LarabizCMS\Modules\Payment\Contracts\Module;
+use LarabizCMS\Modules\Payment\Events\PaymentCancel;
 use LarabizCMS\Modules\Payment\Events\PaymentFail;
 use LarabizCMS\Modules\Payment\Events\PaymentSuccess;
 use LarabizCMS\Modules\Payment\Exceptions\PaymentException;
@@ -97,6 +98,12 @@ class Payment implements Contracts\Payment
             ->fill(compact('response'));
 
         if ($response->isRedirect()) {
+            $paymentHistory->update(
+                [
+                    'payment_id' => $response->getTransactionReference(),
+                ]
+            );
+
             return $result->setIsRedirect(true)
                 ->setRedirectUrl($response->getRedirectUrl());
         }
@@ -160,10 +167,17 @@ class Payment implements Contracts\Payment
     {
         $paymentHistory = PaymentHistory::find($transactionId);
 
+        $paymentHistory->update(
+            [
+                'status' => PaymentHistory::STATUS_CANCEL,
+            ]
+        );
+
         $handler = $this->getModule($paymentHistory->module);
 
-        $result = PaymentResult::make($request, $paymentHistory)
-            ->setStatus(PaymentHistory::STATUS_CANCEL);
+        $result = PaymentResult::make($request, $paymentHistory)->setStatus(PaymentHistory::STATUS_CANCEL);
+
+        event(new PaymentCancel($result));
 
         $handler->cancel($result);
 
