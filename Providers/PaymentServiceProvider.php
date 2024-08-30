@@ -3,7 +3,8 @@
 namespace LarabizCMS\Modules\Payment\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Database\Eloquent\Factory;
+use LarabizCMS\Modules\Payment\Payment;
+use LarabizCMS\Modules\Payment\Contracts;
 
 class PaymentServiceProvider extends ServiceProvider
 {
@@ -38,6 +39,13 @@ class PaymentServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->register(RouteServiceProvider::class);
+
+        $this->app->singleton(
+            Contracts\Payment::class,
+            function () {
+                return new Payment();
+            }
+        );
     }
 
     /**
@@ -48,10 +56,10 @@ class PaymentServiceProvider extends ServiceProvider
     protected function registerConfig()
     {
         $this->publishes([
-            module_path($this->moduleName, 'config/config.php') => config_path($this->moduleNameLower . '.php'),
+            module_path($this->moduleName, 'config/payment.php') => config_path($this->moduleNameLower . '.php'),
         ], 'config');
         $this->mergeConfigFrom(
-            module_path($this->moduleName, 'config/config.php'), $this->moduleNameLower
+            module_path($this->moduleName, 'config/payment.php'), $this->moduleNameLower
         );
     }
 

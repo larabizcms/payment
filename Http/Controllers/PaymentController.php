@@ -1,79 +1,61 @@
 <?php
+/**
+ * LARABIZ CMS - Full SPA Laravel CMS
+ *
+ * @package    larabizcms/larabiz
+ * @author     The Anh Dang
+ * @link       https://larabiz.com
+ */
 
 namespace LarabizCMS\Modules\Payment\Http\Controllers;
 
-use Illuminate\Contracts\Support\Renderable;
+use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
+use LarabizCMS\Core\Http\Controllers\APIController;
+use LarabizCMS\Modules\Payment\Events\PaymentSuccess;
+use LarabizCMS\Modules\Payment\Exceptions\PaymentException;
+use LarabizCMS\Modules\Payment\Facades\Payment;
+use Omnipay\Omnipay;
 
-class PaymentController extends Controller
+class PaymentController extends APIController
 {
-    /**
-     * Display a listing of the resource.
-     * @return Renderable
-     */
-    public function index()
+    public function purchase(Request $request, string $module, string $driver): JsonResponse
     {
-        return view('payment::index');
-    }
+        $gateway = Omnipay::create($driver);
 
-    /**
-     * Show the form for creating a new resource.
-     * @return Renderable
-     */
-    public function create()
-    {
-        return view('payment::create');
-    }
+        $gateway->initialize(config("payment.methods.{$driver}"));
 
-    /**
-     * Store a newly created resource in storage.
-     * @param Request $request
-     * @return Renderable
-     */
-    public function store(Request $request)
-    {
-        //
-    }
+        try {
+            $handler = Payment::getModule($module);
 
-    /**
-     * Show the specified resource.
-     * @param int $id
-     * @return Renderable
-     */
-    public function show($id)
-    {
-        return view('payment::show');
-    }
+            $response = $gateway->purchase($handler->options($driver, $request->all()))->send();
+        } catch (PaymentException $e) {
+            return $this->restFail($e->getMessage());
+        } catch (Exception $e) {
+            report($e);
+            return $this->restFail(__('Sorry, there was an error processing your payment. Please try again later.'));
+        }
 
-    /**
-     * Show the form for editing the specified resource.
-     * @param int $id
-     * @return Renderable
-     */
-    public function edit($id)
-    {
-        return view('payment::edit');
-    }
+        if ($response->isSuccessful()) {
+            event(new PaymentSuccess($module, $driver));
 
-    /**
-     * Update the specified resource in storage.
-     * @param Request $request
-     * @param int $id
-     * @return Renderable
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
+            $handler->success($response->getData());
 
-    /**
-     * Remove the specified resource from storage.
-     * @param int $id
-     * @return Renderable
-     */
-    public function destroy($id)
-    {
-        //
+            return $this->restSuccess([], __('Payment successful!'));
+        }
+
+        if ($response->isRedirect()) {
+            return $this->restSuccess(
+                [
+                    'type' => 'redirect',
+                    'redirectUrl' => $response->getRedirectUrl(),
+                ]
+            );
+        }
+
+        $handler->fail($response->getData());
+
+        return $this->restFail($response->getMessage());
     }
 }

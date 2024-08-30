@@ -19,5 +19,10 @@
         "psr-4": {
             "LarabizCMS\\Modules\\Payment\\": ""
         }
+    },
+    "require": {
+        "php": "^8.0|^8.1",
+        "league/omnipay": "^3",
+        "omnipay/paypal": "^3.0"
     }
 }
