@@ -16,7 +16,7 @@ return new class extends Migration {
         Schema::create(
             'payment_histories',
             function (Blueprint $table) {
-                $table->uuid('id');
+                $table->uuid('id')->primary();
                 $table->string('module', 50)->index();
                 $table->morphs('payer');
                 $table->string('payment_id', 150)->nullable();

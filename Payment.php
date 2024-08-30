@@ -47,7 +47,10 @@ class Payment implements Contracts\Payment
     {
         $user = $request->user();
         $handler = $this->getModule($module);
-        $params = $handler->options($driver, $request);
+        $gateway = Omnipay::create($driver);
+        $gateway->initialize(config("payment.methods.{$driver}"));
+        
+        $params = $handler->purchase($driver, $request);
 
         $paymentHistory = PaymentHistory::create(
             [
@@ -60,10 +63,6 @@ class Payment implements Contracts\Payment
                 'data' => $params,
             ]
         );
-
-        $gateway = Omnipay::create($driver);
-
-        $gateway->initialize(config("payment.methods.{$driver}"));
 
         $response = $gateway->purchase($params)->send();
 
