@@ -15,17 +15,15 @@ return new class extends Migration {
         Schema::create(
             'payment_histories',
             function (Blueprint $table) {
-                $table->bigIncrements('id');
-                $table->morphs('module');
+                $table->uuid('id');
+                $table->string('module', 50)->index();
                 $table->morphs('payer');
                 $table->string('payment_id', 150);
                 $table->string('payment_method', 50);
                 $table->string('status', 50)->default('success');
                 $table->json('data')->nullable();
-                $table->float('amount');
+                $table->float('amount', 0, 0);
                 $table->timestamps();
-
-                $table->index(['module_type']);
             }
         );
     }

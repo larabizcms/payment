@@ -42,8 +42,6 @@ use LarabizCMS\Core\Models\Model;
  */
 class PaymentMethod extends Model
 {
-    use ResourceModel;
-
     public const STATUS_ACTIVE = 1;
     public const STATUS_INACTIVE = 1;
 

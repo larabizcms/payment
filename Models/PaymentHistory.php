@@ -2,12 +2,15 @@
 
 namespace LarabizCMS\Modules\Payment\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use LarabizCMS\Core\Models\Model;
 
 class PaymentHistory extends Model
 {
+    use HasUuids;
+
     public const STATUS_PROCESSING = 'processing';
     public const STATUS_SUCCESS = 'success';
     public const STATUS_FAIL = 'fail';

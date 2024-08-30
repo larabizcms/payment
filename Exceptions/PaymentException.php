@@ -15,4 +15,9 @@ class PaymentException extends \Exception
     {
         return new static(__('Module :module not found', ['module' => $module]));
     }
+
+    public static function transactionNotFound(string $transactionId): static
+    {
+        return new static(__('Transaction :transactionId not found', ['transactionId' => $transactionId]));
+    }
 }

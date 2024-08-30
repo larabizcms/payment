@@ -15,10 +15,14 @@ use LarabizCMS\Modules\Payment\Http\Controllers\PaymentController;
 
 Route::group(
     [
-        'prefix' => 'payment/{module}/{driver}',
+        'prefix' => 'payment',
     ],
     function () {
-        Route::post('purchase', [PaymentController::class, 'purchase'])->name('api.payment.complete');
-        Route::match(['get', 'post'], 'complete', [PaymentController::class, 'complete']);
+        Route::post('{module}/purchase', [PaymentController::class, 'purchase'])
+            ->name('api.payment.purchase');
+        Route::match(['get', 'post'], '{module}/complete/{transactionId}', [PaymentController::class, 'complete'])
+            ->name('api.payment.complete');
+        Route::get('{module}/cancel/{transactionId}', [PaymentController::class, 'purchase'])
+            ->name('api.payment.cancel');
     }
 );

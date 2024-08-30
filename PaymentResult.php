@@ -15,28 +15,49 @@ use Omnipay\Common\Message\ResponseInterface;
 
 class PaymentResult
 {
-    public Request $request;
-
     public string $module;
 
     public string $driver;
+
+    public ?string $redirectUrl = null;
+
+    public bool $isRedirect = false;
+
+    public string $transactionId;
 
     public string $status = PaymentHistory::STATUS_PROCESSING;
 
     public ?ResponseInterface $response = null;
 
-    public ?PaymentHistory $paymentHistory = null;
-
-    public static function make(Request $request, string $module, string $driver): static
+    public static function make(Request $request, PaymentHistory $paymentHistory): static
     {
-        return new static($request, $module, $driver);
+        return new static($request, $paymentHistory);
     }
 
-    public function __construct(Request $request, string $module, string $driver)
+    public function __construct(public Request $request, public PaymentHistory $paymentHistory)
     {
-        $this->request = $request;
-        $this->module = $module;
-        $this->driver = $driver;
+        $this->module = $paymentHistory->module;
+        $this->driver = $paymentHistory->payment_method;
+        $this->transactionId = $paymentHistory->id;
+    }
+
+    public function setRedirectUrl(string $url): static
+    {
+        $this->redirectUrl = $url;
+
+        return $this;
+    }
+
+    public function setIsRedirect(bool $isRedirect): static
+    {
+        $this->isRedirect = $isRedirect;
+
+        return $this;
+    }
+
+    public function isSuccessful(): bool
+    {
+        return $this->status === PaymentHistory::STATUS_SUCCESS;
     }
 
     public function setStatus(string $status): static
