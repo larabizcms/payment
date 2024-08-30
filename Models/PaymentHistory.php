@@ -6,10 +6,12 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use LarabizCMS\Core\Models\Model;
+use LarabizCMS\LaravelModelHelper\Traits\HasAPI;
+use LarabizCMS\Modules\Payment\Http\Resporces\PaymentHistoryResporce;
 
 class PaymentHistory extends Model
 {
-    use HasUuids;
+    use HasUuids, HasAPI;
 
     public const STATUS_PROCESSING = 'processing';
     public const STATUS_SUCCESS = 'success';
@@ -30,6 +32,11 @@ class PaymentHistory extends Model
     ];
 
     protected $casts = ['data' => 'array', 'amount' => 'float'];
+
+    public static function getResource(): string
+    {
+        return PaymentHistoryResporce::class;
+    }
 
     public function paymentMethod(): BelongsTo
     {
