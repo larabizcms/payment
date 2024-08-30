@@ -13,9 +13,12 @@ use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use LarabizCMS\Core\Http\Controllers\APIController;
+use LarabizCMS\Modules\Payment\Events\PaymentFail;
 use LarabizCMS\Modules\Payment\Events\PaymentSuccess;
 use LarabizCMS\Modules\Payment\Exceptions\PaymentException;
 use LarabizCMS\Modules\Payment\Facades\Payment;
+use LarabizCMS\Modules\Payment\Models\PaymentHistory;
+use LarabizCMS\Modules\Payment\PaymentResult;
 use Omnipay\Omnipay;
 
 class PaymentController extends APIController
@@ -26,10 +29,34 @@ class PaymentController extends APIController
 
         $gateway->initialize(config("payment.methods.{$driver}"));
 
+        $user = $request->user();
+
         try {
             $handler = Payment::getModule($module);
 
-            $response = $gateway->purchase($handler->options($driver, $request))->send();
+            $params = $handler->options($driver, $request);
+
+            if (isset($params['returnUrl'])) {
+                $params['returnUrl'] = route('api.payment.complete', ['module' => $module, 'driver' => $driver]);
+            }
+
+            if (isset($params['cancelUrl'])) {
+                $params['cancelUrl'] = route('api.payment.cancel', ['module' => $module, 'driver' => $driver]);
+            }
+
+            $paymentHistory = PaymentHistory::create(
+                [
+                    'payment_method' => $driver,
+                    'status' => 'processing',
+                    'module_id' => $module,
+                    'module_type' => 'payment',
+                    'payer_type' => get_class($user),
+                    'payer_id' => $user->id,
+                    'amount' => $params['amount'],
+                ]
+            );
+
+            $response = $gateway->purchase($params)->send();
         } catch (PaymentException $e) {
             return $this->restFail($e->getMessage());
         } catch (Exception $e) {
@@ -38,9 +65,22 @@ class PaymentController extends APIController
         }
 
         if ($response->isSuccessful()) {
-            event(new PaymentSuccess($module, $driver, $request, $response));
+            $paymentHistory->update(
+                [
+                    'status' => PaymentHistory::STATUS_SUCCESS,
+                    'payment_id' => $response->getTransactionReference(),
+                ]
+            );
 
-            $handler->success($driver, $request, $response);
+            $result = PaymentResult::make($request, $module, $driver)
+                ->setStatus(PaymentHistory::STATUS_SUCCESS)
+                ->fill(
+                    compact('paymentHistory', 'response')
+                );
+
+            $handler->success($result);
+
+            event(new PaymentSuccess($result));
 
             return $this->restSuccess([], __('Payment successful!'));
         }
@@ -54,7 +94,15 @@ class PaymentController extends APIController
             );
         }
 
-        $handler->fail($driver, $request, $response);
+        $result = PaymentResult::make($request, $module, $driver)
+            ->setStatus(PaymentHistory::STATUS_FAIL)
+            ->fill(
+                compact('paymentHistory', 'response')
+            );
+
+        event(new PaymentFail($result));
+
+        $handler->fail($result);
 
         return $this->restFail($response->getMessage());
     }
@@ -77,11 +125,39 @@ class PaymentController extends APIController
         }
 
         if ($response->isSuccessful()) {
-            $handler->success($driver, $request, $response);
+            $result = PaymentResult::make($request, $module, $driver)
+                ->setStatus(PaymentHistory::STATUS_SUCCESS)
+                ->fill(compact('response'));
+
+            $handler->success($result);
+
             return $this->restSuccess([], __('Payment successful!'));
         }
 
-        $handler->fail($driver, $request, $response);
+        $result = PaymentResult::make($request, $module, $driver)
+            ->setStatus(PaymentHistory::STATUS_FAIL)
+            ->fill(compact('response'));
+
+        $handler->fail($result);
+
+        event(new PaymentFail($result));
+
         return $this->restFail($response->getMessage());
+    }
+
+    public function cancel(Request $request, string $module, string $driver): JsonResponse
+    {
+        try {
+            $handler = Payment::getModule($module);
+        } catch (PaymentException $e) {
+            return $this->restFail($e->getMessage());
+        }
+
+        $result = PaymentResult::make($request, $module, $driver)
+            ->setStatus(PaymentHistory::STATUS_CANCEL);
+
+        $handler->cancel($result);
+
+        return $this->restSuccess([], __('Payment canceled!'));
     }
 }

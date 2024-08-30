@@ -3,10 +3,16 @@
 namespace LarabizCMS\Modules\Payment\Models;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use LarabizCMS\Core\Models\Model;
 
 class PaymentHistory extends Model
 {
+    public const STATUS_PROCESSING = 'processing';
+    public const STATUS_SUCCESS = 'success';
+    public const STATUS_FAIL = 'fail';
+    public const STATUS_CANCEL = 'cancel';
+
     protected $table = 'payment_histories';
 
     protected $fillable = [
@@ -28,7 +34,7 @@ class PaymentHistory extends Model
         return $this->belongsTo(PaymentMethod::class, 'payment_method', 'type');
     }
 
-    public function payer()
+    public function payer(): MorphTo
     {
         return $this->morphTo(__FUNCTION__, 'payer_type', 'payer_id');
     }

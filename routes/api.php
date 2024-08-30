@@ -18,7 +18,7 @@ Route::group(
         'prefix' => 'payment/{module}/{driver}',
     ],
     function () {
-        Route::post('purchase', [PaymentController::class, 'purchase']);
+        Route::post('purchase', [PaymentController::class, 'purchase'])->name('api.payment.complete');
         Route::match(['get', 'post'], 'complete', [PaymentController::class, 'complete']);
     }
 );

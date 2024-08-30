@@ -11,7 +11,7 @@ namespace LarabizCMS\Modules\Payment\Events;
 
 use LarabizCMS\Modules\Payment\PaymentResult;
 
-class PaymentSuccess
+class PaymentFail
 {
     public function __construct(
         public PaymentResult $result
