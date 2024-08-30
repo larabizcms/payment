@@ -56,6 +56,7 @@ class Payment implements Contracts\Payment
                 'payer_type' => get_class($user),
                 'payer_id' => $user->id,
                 'amount' => $params['amount'],
+                'data' => $params,
             ]
         );
 
