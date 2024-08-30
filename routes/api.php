@@ -19,7 +19,7 @@ Route::group(
     ],
     function () {
         Route::post('{module}/purchase', [PaymentController::class, 'purchase']);
-        Route::match(['get', 'post'], '{module}/complete/{transactionId}', [PaymentController::class, 'complete']);
-        Route::get('{module}/cancel/{transactionId}', [PaymentController::class, 'purchase']);
+        Route::post('{module}/complete/{transactionId}', [PaymentController::class, 'complete']);
+        Route::post('{module}/cancel/{transactionId}', [PaymentController::class, 'purchase']);
     }
 );
