@@ -59,11 +59,11 @@ class Payment implements Contracts\Payment
             ]
         );
 
-        if (isset($params['returnUrl'])) {
+        if (! isset($params['returnUrl'])) {
             $params['returnUrl'] = route('api.payment.complete', [$module, $paymentHistory->id]);
         }
 
-        if (isset($params['cancelUrl'])) {
+        if (! isset($params['cancelUrl'])) {
             $params['cancelUrl'] = route('api.payment.cancel', [$module, $paymentHistory->id]);
         }
 
@@ -72,7 +72,7 @@ class Payment implements Contracts\Payment
         $gateway->initialize(config("payment.methods.{$driver}"));
 
         $response = $gateway->purchase($params)->send();
-        
+
         if ($response->isSuccessful() && ! $response->isRedirect()) {
             $paymentHistory->update(
                 [
