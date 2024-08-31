@@ -17,7 +17,12 @@
     },
     "autoload": {
         "psr-4": {
-            "LarabizCMS\\Modules\\Payment\\": ""
+            "LarabizCMS\\Modules\\Payment\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "LarabizCMS\\Modules\\Payment\\Tests\\": "tests/"
         }
     },
     "require": {

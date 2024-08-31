@@ -3,8 +3,8 @@
 namespace LarabizCMS\Modules\Payment\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use LarabizCMS\Modules\Payment\Payment;
 use LarabizCMS\Modules\Payment\Contracts;
+use LarabizCMS\Modules\Payment\Payment;
 
 class PaymentServiceProvider extends ServiceProvider
 {
