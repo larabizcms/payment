@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use LarabizCMS\Core\Models\Model;
-use LarabizCMS\LaravelModelHelper\Traits\HasAPI;
+use LarabizCMS\Core\Traits\HasAPI;
 use LarabizCMS\Modules\Payment\Http\Resporces\PaymentHistoryResporce;
 
 class PaymentHistory extends Model
