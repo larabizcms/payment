@@ -17,7 +17,9 @@ use LarabizCMS\Modules\Payment\Http\Controllers\PaymentHistoryController;
 Route::group(
     [
         'prefix' => 'payment',
-        'middleware' => ['auth:api'],
+        'middleware' => [
+            ...config('larabiz.auth_middleware'),
+        ],
     ],
     function () {
         Route::post('{module}/purchase', [PaymentController::class, 'purchase']);
