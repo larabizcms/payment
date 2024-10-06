@@ -1,10 +1,12 @@
 {
     "name": "larabizcms/payment",
+    "type": "larabiz-module",
     "description": "Payment support module for Larabiz CMS",
     "authors": [
         {
             "name": "Dang The Anh",
-            "email": "admin@larabiz.com"
+            "email": "admin@larabiz.com",
+            "url": "https://larabiz.com"
         }
     ],
     "extra": {
