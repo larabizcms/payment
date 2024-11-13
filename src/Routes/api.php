@@ -30,3 +30,12 @@ Route::group(
             ->only(['index']);
     }
 );
+
+Route::group(
+    [
+        'prefix' => 'payment',
+    ],
+    function () {
+        Route::get('{module}/methods', [PaymentController::class, 'methods']);
+    }
+);

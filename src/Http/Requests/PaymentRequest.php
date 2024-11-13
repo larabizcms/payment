@@ -12,8 +12,8 @@ use OpenApi\Annotations as OA;
  *      @OA\MediaType(
  *          mediaType="multipart/form-data",
  *          @OA\Schema(
- *              required={"driver"},
- *              @OA\Property(property="driver", type="string"),
+ *              required={"method"},
+ *              @OA\Property(property="method", type="string"),
  *          )
  *      )
  * )
@@ -28,7 +28,7 @@ class PaymentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'driver' => ['required', 'string'],
+            'method' => ['required', 'string'],
         ];
     }
 }

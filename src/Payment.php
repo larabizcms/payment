@@ -15,6 +15,7 @@ use LarabizCMS\Modules\Payment\Events\PaymentCancel;
 use LarabizCMS\Modules\Payment\Events\PaymentFail;
 use LarabizCMS\Modules\Payment\Events\PaymentSuccess;
 use LarabizCMS\Modules\Payment\Exceptions\PaymentException;
+use LarabizCMS\Modules\Payment\Exceptions\PaymentMethodNotFoundException;
 use LarabizCMS\Modules\Payment\Models\PaymentHistory;
 use Omnipay\Omnipay;
 
@@ -43,18 +44,51 @@ class Payment implements Contracts\Payment
         return app($this->modules[$module]);
     }
 
-    public function create(Request $request, string $module, string $driver): PaymentResult
+    /**
+     * Get registered modules
+     *
+     * @return array
+     */
+    public function modules(): array
+    {
+        return $this->modules;
+    }
+
+    public function methods(): array
+    {
+        return collect(config('payment.methods', []))
+            ->filter(fn ($method) => ($method['enabled'] ?? true))
+            ->map(function ($method, $driver) {
+                return [
+                    'driver' => $method['driver'] ?? $driver,
+                    ...$method,
+                ];
+            })
+            ->toArray();
+    }
+
+    /**
+     * Get the payment method details for a given driver.
+     *
+     * @param  string  $driver  The payment driver identifier.
+     * @return array|null  The details of the specified payment method.
+     */
+    public function method(string $method): array|null
+    {
+        return $this->methods()[$method] ?? null;
+    }
+
+    public function create(Request $request, string $module, string $method): PaymentResult
     {
         $user = $request->user();
         $handler = $this->getModule($module);
-        $gateway = Omnipay::create($driver);
-        $gateway->initialize(config("payment.methods.{$driver}"));
-        
-        $params = $handler->purchase($driver, $request);
+        $gateway = $this->createGateway($method);
+
+        $params = $handler->purchase($method, $request);
 
         $paymentHistory = PaymentHistory::create(
             [
-                'payment_method' => $driver,
+                'payment_method' => $method,
                 'status' => 'processing',
                 'module' => $module,
                 'payer_type' => get_class($user),
@@ -120,12 +154,9 @@ class Payment implements Contracts\Payment
             throw PaymentException::transactionNotFound($transactionId);
         }
 
-        $driver = $paymentHistory->payment_method;
         $module = $paymentHistory->module;
 
-        $gateway = Omnipay::create($driver);
-
-        $gateway->initialize(config("payment.methods.{$driver}"));
+        $gateway = $this->createGateway($paymentHistory->payment_method);
 
         $handler = $this->getModule($module);
 
@@ -173,5 +204,17 @@ class Payment implements Contracts\Payment
         $handler->cancel($result);
 
         return $result;
+    }
+
+    protected function createGateway(string $method): \Omnipay\Common\GatewayInterface
+    {
+        if ($config = $this->method($method)) {
+            $gateway = Omnipay::create($config['driver']);
+            $gateway->initialize($config);
+
+            return $gateway;
+        }
+
+        throw PaymentMethodNotFoundException::make($method);
     }
 }

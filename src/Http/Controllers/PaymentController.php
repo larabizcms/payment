@@ -12,6 +12,7 @@ namespace LarabizCMS\Modules\Payment\Http\Controllers;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use LarabizCMS\Core\Http\Controllers\APIController;
 use LarabizCMS\Modules\Payment\Exceptions\PaymentException;
 use LarabizCMS\Modules\Payment\Facades\Payment;
@@ -74,11 +75,11 @@ class PaymentController extends APIController
      */
     public function purchase(PaymentRequest $request, string $module): JsonResponse
     {
-        $driver = $request->input('driver');
+        $method = $request->input('method');
 
         try {
             $payment = DB::transaction(
-                fn () => Payment::create($request, $module, $driver)
+                fn () => Payment::create($request, $module, $method)
             );
         } catch (PaymentException $e) {
             return $this->restFail($e->getMessage());
@@ -259,6 +260,23 @@ class PaymentController extends APIController
             ],
             __('Payment canceled!')
         );
+    }
+
+    public function methods(): JsonResponse
+    {
+        $payments = collect(Payment::methods())
+            ->map(function ($payment, $driver) {
+                return [
+                    ...$payment,
+                    'code' => $driver,
+                    'name' => $payment['name'] ?? title_from_key($driver),
+                    'icon' => Str::snake($payment['icon'] ?? 'card'),
+                    'description' => $payment['description'] ?? null,
+                ];
+            })
+            ->values();
+
+        return $this->restSuccess($payments, 'Payment methods retrieved successfully');
     }
 
     protected function failResponse(PaymentResult $result): JsonResponse

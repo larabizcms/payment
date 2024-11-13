@@ -20,6 +20,8 @@ use LarabizCMS\Modules\Payment\PaymentResult;
  * @method static PaymentResult create(Request $request, string $module, string $driver)
  * @method static PaymentResult complete(Request $request, string $transactionId)
  * @method static PaymentResult cancel(Request $request, string $transactionId)
+ * @method static array modules()
+ * @method static array methods()
  * @see \LarabizCMS\Modules\Payment\Payment
  */
 class Payment extends Facade
