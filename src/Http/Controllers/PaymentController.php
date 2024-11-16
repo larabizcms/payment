@@ -12,7 +12,6 @@ namespace LarabizCMS\Modules\Payment\Http\Controllers;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use LarabizCMS\Core\Http\Controllers\APIController;
 use LarabizCMS\Modules\Payment\Exceptions\PaymentException;
 use LarabizCMS\Modules\Payment\Facades\Payment;

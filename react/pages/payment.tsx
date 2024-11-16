@@ -3,38 +3,47 @@ import { Card, CircularProgress, createTheme, CssBaseline, Grid, Stack, ThemePro
 import React, { useEffect } from "react";
 import { t } from "i18next";
 import { useParams } from "react-router-dom";
-import http from "@larabiz/http-common";
-import { getMessageInError, showNotification } from "@larabiz/helpers/helper";
+import { getMessageInError } from "@larabiz/helpers/helper";
+import { useAppDispatch } from "@larabiz/hooks/hooks";
+import { cancel, complete } from "@larabiz/features/payment/payment/paymentActions";
+import { useSelector } from "react-redux";
+import { RootState } from "@local/store";
 
 export default function Payment({ page }: { page: string }) {
     const { transactionId } = useParams();
     const checkoutTheme = createTheme();
     const pageName = page == 'complete' ? t('Complete') : t('Cancel');
+    const dispatch = useAppDispatch();
+    const { loading } = useSelector((state: RootState) => state.payment);
+
+    const redirectHandler = (res: any) => {
+        if (res.success) {
+            window.location.href = '/admin-cp/profile?success=true';
+        } else {
+            const error = getMessageInError(res);
+            window.location.href = '/admin-cp/profile?success=false&error=' + error;
+        }
+    }
 
     useEffect(() => {
-        if (window.location.search) {
+        if (window.location.search && transactionId && !loading) {
             const query = new URLSearchParams(window.location.search);
-            const api = `/payment/ecommerce/` + page + `/` + transactionId;
-            const data = Object.fromEntries(query.entries());
-            console.log(data);
 
-            http.post(api, data).then((res) => {
-                if (res.data.success === true) {
-                    setTimeout(() => {
-                        if (res.data.data.redirect_url) {
-                            window.location.href = res.data.data.redirect_url;
-                        } else {
-                            window.location.href = '/';
-                        }
-                    }, 500);
-                }
-            })
-                .catch((res: any) => {
-                    showNotification(getMessageInError(res), 'error');
-                    setTimeout(() => {
-                        window.location.href = '/?error='+getMessageInError(res);
-                    }, 500);
-                });
+            const data = {
+                ...Object.fromEntries(query.entries()),
+                transaction_id: transactionId as string,
+                module: 'ecommerce',
+            };
+
+            if (page == 'complete') {
+                dispatch(complete(data))
+                    .then(redirectHandler)
+                    .catch(redirectHandler);
+            } else {
+                dispatch(cancel(data))
+                    .then(redirectHandler)
+                    .catch(redirectHandler);
+            }
         }
     }, [transactionId]);
 
