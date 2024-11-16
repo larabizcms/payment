@@ -13,13 +13,13 @@ use LarabizCMS\Modules\Payment\Contracts\ModuleHandler;
 
 abstract class BaseModuleHandler implements ModuleHandler
 {
-    protected function getDefaultReturnUrl(string $module, string $transactionId): string
+    public function fail(PaymentResult $result): void
     {
-        return url("/payment/{$module}/complete/{$transactionId}");
+        // TODO: Implement fail() method.
     }
 
-    protected function getDefaultCancelUrl(string $module, string $transactionId): string
+    public function cancel(PaymentResult $result): void
     {
-        return url("/payment/{$module}/cancel/{$transactionId}");
+        // TODO: Implement cancel() method.
     }
 }

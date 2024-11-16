@@ -105,4 +105,13 @@ class PaymentHistory extends Model
     {
         return $this->morphTo(__FUNCTION__, 'paymentable_type', 'paymentable_id');
     }
+
+    public function getData(?string $key = null, $default = null): null|array|string
+    {
+        if (is_null($key)) {
+            return $this->data;
+        }
+
+        return data_get($this->data, $key, $default);
+    }
 }

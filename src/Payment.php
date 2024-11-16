@@ -118,14 +118,15 @@ class Payment implements Contracts\Payment
 
         $purchase = $handler->purchase($request, $paymentHistory->id, $method);
 
-        $response = $gateway->purchase($purchase->options)->send();
+        $response = $gateway->purchase($purchase->getOptions())->send();
 
         if ($response->isSuccessful() && !$response->isRedirect()) {
-            $paymentHistory->paymentable()->associate($purchase->paymentable);
+            $paymentHistory->paymentable()->associate($purchase->getPaymentable());
             $paymentHistory->fill(
                 [
                     'status' => PaymentHistory::STATUS_SUCCESS,
                     'payment_id' => $response->getTransactionReference(),
+                    'data' => $response->getData(),
                 ]
             );
             $paymentHistory->save();
@@ -144,7 +145,7 @@ class Payment implements Contracts\Payment
         $result = PaymentResult::make($request, $paymentHistory)->fill(compact('response'));
 
         if ($response->isRedirect()) {
-            $paymentHistory->paymentable()->associate($purchase->paymentable);
+            $paymentHistory->paymentable()->associate($purchase->getPaymentable());
             $paymentHistory->fill(['payment_id' => $response->getTransactionReference()]);
             $paymentHistory->save();
 
