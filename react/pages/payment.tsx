@@ -31,9 +31,12 @@ export default function Payment({ page }: { page: string }) {
             })
                 .catch((res: any) => {
                     showNotification(getMessageInError(res), 'error');
+                    setTimeout(() => {
+                        window.location.href = '/?error='+getMessageInError(res);
+                    }, 500);
                 });
         }
-    }, [window.location.search]);
+    }, [transactionId]);
 
     return (
         <ThemeProvider theme={checkoutTheme}>

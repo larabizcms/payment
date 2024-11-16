@@ -268,7 +268,6 @@ class PaymentController extends APIController
                 'transaction_id' => $transactionId,
                 'status' => $payment->status,
                 'module' => $module,
-                'redirect_url' => $payment->getRedirectUrl(),
             ],
             __('Payment canceled!')
         );
