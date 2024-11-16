@@ -65,11 +65,11 @@ class Payment implements Contracts\Payment
         $methods = [];
 
         foreach ($allMethods as $driver => $method) {
-            $name = $method['name'] ?? title_from_key($driver);
             $methods[$driver] = new Method(
-                $name,
+                $driver,
                 [
                     'driver' => $method['driver'] ?? $driver,
+                    'label' => $method['label'] ?? title_from_key($method['name'] ?? $driver),
                     ...$method,
                 ]
             );
@@ -89,6 +89,14 @@ class Payment implements Contracts\Payment
         return $this->methods()[$method] ?? null;
     }
 
+    /**
+     * Create payment
+     *
+     * @param  Request  $request
+     * @param  string  $module
+     * @param  Method  $method
+     * @return PaymentResult
+     */
     public function create(Request $request, string $module, Method $method): PaymentResult
     {
         $user = $request->user();
@@ -97,17 +105,19 @@ class Payment implements Contracts\Payment
 
         $params = $handler->purchase($method, $request);
 
-        $paymentHistory = PaymentHistory::create(
+        $paymentHistory = new PaymentHistory(
             [
-                'payment_method' => $method,
+                'payment_method' => $method->name,
                 'status' => 'processing',
                 'module' => $module,
-                'payer_type' => get_class($user),
-                'payer_id' => $user->id,
                 'amount' => $params['amount'],
                 'data' => $params,
             ]
         );
+
+        $paymentHistory->payer()->associate($user);
+
+        $paymentHistory->save();
 
         $response = $gateway->purchase($params)->send();
 
@@ -167,7 +177,7 @@ class Payment implements Contracts\Payment
 
         $module = $paymentHistory->module;
 
-        $gateway = $this->createGateway($paymentHistory->payment_method);
+        $gateway = $this->createGateway($this->method($paymentHistory->payment_method));
 
         $handler = $this->getModule($module);
 
@@ -217,15 +227,10 @@ class Payment implements Contracts\Payment
         return $result;
     }
 
-    protected function createGateway(string $method): \Omnipay\Common\GatewayInterface
+    protected function createGateway(Method $method): \Omnipay\Common\GatewayInterface
     {
-        if ($config = $this->method($method)) {
-            $gateway = Omnipay::create($config['driver']);
-            $gateway->initialize($config);
-
-            return $gateway;
-        }
-
-        throw PaymentMethodNotFoundException::make($method);
+        $gateway = Omnipay::create($method->driver);
+        $gateway->initialize($method->getConfigs());
+        return $gateway;
     }
 }

@@ -9,7 +9,7 @@ return [
             'driver' => 'PayPal_Rest',
             'testMode' => env('PAYMENT_PAYPAL_TEST_MODE', false),
             'icon'     => 'CreditCardRoundedIcon',
-            'name'     => 'PayPal / Visa / MasterCard',
+            'label'     => 'PayPal / Visa / MasterCard',
             'description' => 'Secure payment via Paypal.',
         ],
     ],

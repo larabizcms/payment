@@ -22,7 +22,7 @@ return new class extends Migration {
                 $table->string('type', 50)->index();
                 $table->string('name');
                 $table->text('description')->nullable();
-                $table->json('data')->nullable();
+                $table->json('configs')->nullable();
                 $table->boolean('active')->default(true);
                 $table->timestamps();
             }

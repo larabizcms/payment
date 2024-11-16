@@ -33,6 +33,17 @@ class PaymentHistory extends Model
 
     protected $casts = ['data' => 'array', 'amount' => 'float'];
 
+    public $sortable = [
+        'created_at',
+        'status',
+        'payment_method',
+        'amount',
+    ];
+
+    public $sortDefault = [
+        'created_at' => 'desc',
+    ];
+
     public static function getResource(): string
     {
         return PaymentHistoryResporce::class;
