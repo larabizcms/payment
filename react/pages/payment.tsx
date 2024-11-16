@@ -10,17 +10,17 @@ import { useSelector } from "react-redux";
 import { RootState } from "@local/store";
 
 export default function Payment({ page }: { page: string }) {
-    const { transactionId } = useParams();
+    const { module, transactionId } = useParams();
     const checkoutTheme = createTheme();
     const pageName = page == 'complete' ? t('Complete') : t('Cancel');
     const dispatch = useAppDispatch();
     const { loading } = useSelector((state: RootState) => state.payment);
 
     const redirectHandler = (res: any) => {
-        if (res.success) {
+        if (res?.success) {
             window.location.href = '/admin-cp/profile?success=true';
         } else {
-            const error = getMessageInError(res);
+            const error = getMessageInError(res.payload);
             window.location.href = '/admin-cp/profile?success=false&error=' + error;
         }
     }
@@ -32,7 +32,7 @@ export default function Payment({ page }: { page: string }) {
             const data = {
                 ...Object.fromEntries(query.entries()),
                 transaction_id: transactionId as string,
-                module: 'ecommerce',
+                module: module as string,
             };
 
             if (page == 'complete') {
@@ -45,7 +45,7 @@ export default function Payment({ page }: { page: string }) {
                     .catch(redirectHandler);
             }
         }
-    }, [transactionId]);
+    }, [module, transactionId]);
 
     return (
         <ThemeProvider theme={checkoutTheme}>

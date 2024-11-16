@@ -4,11 +4,11 @@ import Payment from "./pages/payment";
 
 const routes: RouteObject[] = [
     {
-        path: "/payment/:transactionId/complete",
+        path: "/payment/complete/:transactionId",
         element: <Payment page="complete" />
     },
     {
-        path: "/payment/:transactionId/cancel",
+        path: "/payment/:module/cancel/:transactionId",
         element: <Payment page="cancel" />
     }
 ];
