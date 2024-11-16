@@ -1,5 +1,6 @@
 <?php
 
+use LarabizCMS\Modules\Payment\Http\Controllers\MethodController;
 use LarabizCMS\Modules\Payment\Http\Controllers\PaymentController;
 use LarabizCMS\Modules\Payment\Http\Controllers\PaymentHistoryController;
 
@@ -36,6 +37,6 @@ Route::group(
         'prefix' => 'payment',
     ],
     function () {
-        Route::get('{module}/methods', [PaymentController::class, 'methods']);
+        Route::get('{module}/methods', [MethodController::class, 'index']);
     }
 );

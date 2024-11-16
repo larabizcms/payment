@@ -10,6 +10,7 @@
 namespace LarabizCMS\Modules\Payment\Contracts;
 
 use Illuminate\Http\Request;
+use LarabizCMS\Modules\Payment\Method;
 use LarabizCMS\Modules\Payment\PaymentResult;
 
 interface Payment
@@ -42,5 +43,5 @@ interface Payment
      * @return PaymentResult
      * @see \LarabizCMS\Modules\Payment\Payment::create()
      */
-    public function create(Request $request, string $module, string $driver): PaymentResult;
+    public function create(Request $request, string $module, Method $method): PaymentResult;
 }

@@ -18,6 +18,6 @@ class PaymentException extends \Exception
 
     public static function transactionNotFound(string $transactionId): static
     {
-        return new static(__('Transaction :transactionId not found', ['transactionId' => $transactionId]));
+        return TransactionNotFoundException::make($transactionId);
     }
 }

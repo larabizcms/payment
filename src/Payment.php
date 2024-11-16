@@ -37,7 +37,7 @@ class Payment implements Contracts\Payment
 
     public function getModule(string $module): Module
     {
-        if (! isset($this->modules[$module])) {
+        if (!isset($this->modules[$module])) {
             throw PaymentException::moduleNotFound('Module not found');
         }
 
@@ -54,31 +54,42 @@ class Payment implements Contracts\Payment
         return $this->modules;
     }
 
+    /**
+     * Get all payment methods.
+     *
+     * @return array<string, Method>
+     */
     public function methods(): array
     {
-        return collect(config('payment.methods', []))
-            ->filter(fn ($method) => ($method['enabled'] ?? true))
-            ->map(function ($method, $driver) {
-                return [
+        $allMethods = array_filter(config('payment.methods', []), fn($method) => ($method['enabled'] ?? true));
+        $methods = [];
+
+        foreach ($allMethods as $driver => $method) {
+            $name = $method['name'] ?? title_from_key($driver);
+            $methods[$driver] = new Method(
+                $name,
+                [
                     'driver' => $method['driver'] ?? $driver,
                     ...$method,
-                ];
-            })
-            ->toArray();
+                ]
+            );
+        }
+
+        return $methods;
     }
 
     /**
      * Get the payment method details for a given driver.
      *
      * @param  string  $driver  The payment driver identifier.
-     * @return array|null  The details of the specified payment method.
+     * @return Method|null  The details of the specified payment method.
      */
-    public function method(string $method): array|null
+    public function method(string $method): Method|null
     {
         return $this->methods()[$method] ?? null;
     }
 
-    public function create(Request $request, string $module, string $method): PaymentResult
+    public function create(Request $request, string $module, Method $method): PaymentResult
     {
         $user = $request->user();
         $handler = $this->getModule($module);
@@ -100,7 +111,7 @@ class Payment implements Contracts\Payment
 
         $response = $gateway->purchase($params)->send();
 
-        if ($response->isSuccessful() && ! $response->isRedirect()) {
+        if ($response->isSuccessful() && !$response->isRedirect()) {
             $paymentHistory->update(
                 [
                     'status' => PaymentHistory::STATUS_SUCCESS,
@@ -150,7 +161,7 @@ class Payment implements Contracts\Payment
     {
         $paymentHistory = PaymentHistory::find($transactionId);
 
-        if (! $paymentHistory) {
+        if (!$paymentHistory) {
             throw PaymentException::transactionNotFound($transactionId);
         }
 

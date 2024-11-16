@@ -3,6 +3,8 @@
 namespace LarabizCMS\Modules\Payment\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+use LarabizCMS\Modules\Payment\Facades\Payment;
 use OpenApi\Annotations as OA;
 
 /**
@@ -27,8 +29,10 @@ class PaymentRequest extends FormRequest
      */
     public function rules(): array
     {
+        $methods = array_keys(Payment::methods());
+
         return [
-            'method' => ['required', 'string'],
+            'method' => ['required', 'string', Rule::in($methods)],
         ];
     }
 }

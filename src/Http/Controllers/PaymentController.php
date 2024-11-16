@@ -75,7 +75,7 @@ class PaymentController extends APIController
      */
     public function purchase(PaymentRequest $request, string $module): JsonResponse
     {
-        $method = $request->input('method');
+        $method = Payment::method($request->input('method'));
 
         try {
             $payment = DB::transaction(
@@ -260,23 +260,6 @@ class PaymentController extends APIController
             ],
             __('Payment canceled!')
         );
-    }
-
-    public function methods(): JsonResponse
-    {
-        $payments = collect(Payment::methods())
-            ->map(function ($payment, $driver) {
-                return [
-                    ...$payment,
-                    'code' => $driver,
-                    'name' => $payment['name'] ?? title_from_key($driver),
-                    'icon' => Str::snake($payment['icon'] ?? 'card'),
-                    'description' => $payment['description'] ?? null,
-                ];
-            })
-            ->values();
-
-        return $this->restSuccess($payments, 'Payment methods retrieved successfully');
     }
 
     protected function failResponse(PaymentResult $result): JsonResponse
