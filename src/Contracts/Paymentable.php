@@ -9,7 +9,7 @@
 
 namespace LarabizCMS\Modules\Payment\Contracts;
 
-interface Module
+interface Paymentable
 {
 
 }

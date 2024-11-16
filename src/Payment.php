@@ -10,12 +10,11 @@
 namespace LarabizCMS\Modules\Payment;
 
 use Illuminate\Http\Request;
-use LarabizCMS\Modules\Payment\Contracts\Module;
+use LarabizCMS\Modules\Payment\Contracts\ModuleHandler;
 use LarabizCMS\Modules\Payment\Events\PaymentCancel;
 use LarabizCMS\Modules\Payment\Events\PaymentFail;
 use LarabizCMS\Modules\Payment\Events\PaymentSuccess;
 use LarabizCMS\Modules\Payment\Exceptions\PaymentException;
-use LarabizCMS\Modules\Payment\Exceptions\PaymentMethodNotFoundException;
 use LarabizCMS\Modules\Payment\Models\PaymentHistory;
 use Omnipay\Omnipay;
 
@@ -27,7 +26,7 @@ class Payment implements Contracts\Payment
      * Register module in payment
      *
      * @param  string  $module
-     * @param  string<Module>  $handler
+     * @param  string<ModuleHandler>  $handler
      * @return void
      */
     public function registerModule(string $module, string $handler): void
@@ -35,7 +34,7 @@ class Payment implements Contracts\Payment
         $this->modules[$module] = $handler;
     }
 
-    public function getModule(string $module): Module
+    public function getModule(string $module): ModuleHandler
     {
         if (!isset($this->modules[$module])) {
             throw PaymentException::moduleNotFound('Module not found');
@@ -103,15 +102,11 @@ class Payment implements Contracts\Payment
         $handler = $this->getModule($module);
         $gateway = $this->createGateway($method);
 
-        $params = $handler->purchase($method, $request);
-
         $paymentHistory = new PaymentHistory(
             [
                 'payment_method' => $method->name,
                 'status' => 'processing',
                 'module' => $module,
-                'amount' => $params['amount'],
-                'data' => $params,
             ]
         );
 
@@ -119,9 +114,12 @@ class Payment implements Contracts\Payment
 
         $paymentHistory->save();
 
+        $params = $handler->purchase($request, $paymentHistory->id, $method);
+
         $response = $gateway->purchase($params)->send();
 
         if ($response->isSuccessful() && !$response->isRedirect()) {
+
             $paymentHistory->update(
                 [
                     'status' => PaymentHistory::STATUS_SUCCESS,
@@ -140,8 +138,7 @@ class Payment implements Contracts\Payment
             return $result;
         }
 
-        $result = PaymentResult::make($request, $paymentHistory)
-            ->fill(compact('response'));
+        $result = PaymentResult::make($request, $paymentHistory)->fill(compact('response'));
 
         if ($response->isRedirect()) {
             $paymentHistory->update(

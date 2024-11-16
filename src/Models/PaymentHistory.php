@@ -28,7 +28,8 @@ class PaymentHistory extends Model
         'payer_type',
         'payer_id',
         'payment_id',
-        'amount',
+        'paymentable_type',
+        'paymentable_id',
     ];
 
     protected $casts = ['data' => 'array', 'amount' => 'float'];
@@ -37,7 +38,6 @@ class PaymentHistory extends Model
         'created_at',
         'status',
         'payment_method',
-        'amount',
     ];
 
     public $sortDefault = [
@@ -57,5 +57,10 @@ class PaymentHistory extends Model
     public function payer(): MorphTo
     {
         return $this->morphTo(__FUNCTION__, 'payer_type', 'payer_id');
+    }
+
+    public function paymentable(): MorphTo
+    {
+        return $this->morphTo(__FUNCTION__, 'paymentable_type', 'paymentable_id');
     }
 }

@@ -17,7 +17,7 @@ class PaymentResult
 {
     public string $module;
 
-    public string $driver;
+    public string $method;
 
     public ?string $redirectUrl = null;
 
@@ -37,7 +37,7 @@ class PaymentResult
     public function __construct(public Request $request, public PaymentHistory $paymentHistory)
     {
         $this->module = $paymentHistory->module;
-        $this->driver = $paymentHistory->payment_method;
+        $this->method = $paymentHistory->payment_method;
         $this->transactionId = $paymentHistory->id;
     }
 

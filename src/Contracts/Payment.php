@@ -19,7 +19,7 @@ interface Payment
      * Register module in payment
      *
      * @param  string  $module
-     * @param  string<Module>  $handler
+     * @param  string<ModuleHandler>  $handler
      * @return void
      * @see \LarabizCMS\Modules\Payment\Payment::registerModule()
      */
@@ -29,10 +29,10 @@ interface Payment
      * Get module in payment
      *
      * @param  string  $module
-     * @return Module
+     * @return ModuleHandler
      * @see \LarabizCMS\Modules\Payment\Payment::getModule()
      */
-    public function getModule(string $module): Module;
+    public function getModule(string $module): ModuleHandler;
 
     /**
      * Create payment with request

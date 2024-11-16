@@ -11,13 +11,13 @@ namespace LarabizCMS\Modules\Payment\Facades;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Facade;
-use LarabizCMS\Modules\Payment\Contracts\Module;
+use LarabizCMS\Modules\Payment\Contracts\ModuleHandler;
 use LarabizCMS\Modules\Payment\Method;
 use LarabizCMS\Modules\Payment\PaymentResult;
 
 /**
  * @method static void registerModule(string $module, string $handler)
- * @method static Module getModule(string $module)
+ * @method static ModuleHandler getModule(string $module)
  * @method static PaymentResult create(Request $request, string $module, Method $method)
  * @method static PaymentResult complete(Request $request, string $transactionId)
  * @method static PaymentResult cancel(Request $request, string $transactionId)
