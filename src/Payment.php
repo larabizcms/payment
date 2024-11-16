@@ -10,12 +10,14 @@
 namespace LarabizCMS\Modules\Payment;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use LarabizCMS\Modules\Payment\Contracts\ModuleHandler;
 use LarabizCMS\Modules\Payment\Events\PaymentCancel;
 use LarabizCMS\Modules\Payment\Events\PaymentFail;
 use LarabizCMS\Modules\Payment\Events\PaymentSuccess;
 use LarabizCMS\Modules\Payment\Exceptions\PaymentException;
 use LarabizCMS\Modules\Payment\Models\PaymentHistory;
+use Omnipay\Common\GatewayInterface;
 use Omnipay\Omnipay;
 
 class Payment implements Contracts\Payment
@@ -165,18 +167,26 @@ class Payment implements Contracts\Payment
 
     public function complete(Request $request, PaymentHistory $paymentHistory): PaymentResult
     {
-        $module = $paymentHistory->module;
-
         $gateway = $this->createGateway($this->method($paymentHistory->payment_method));
 
-        $handler = $this->getModule($module);
+        $handler = $this->getModule($paymentHistory->module);
 
-        $response = $gateway->completePurchase($request->all())->send();
+        $params = $request->all();
+        $params['transactionReference'] = $paymentHistory->payment_id;
+        unset($params['token']);
+
+        $response = $gateway->completePurchase($params)->send();
 
         if ($response->isSuccessful()) {
             $result = PaymentResult::make($request, $paymentHistory)
                 ->setStatus(PaymentHistory::STATUS_SUCCESS)
                 ->fill(compact('response'));
+
+            $paymentHistory->update(
+                [
+                    'status' => PaymentHistory::STATUS_SUCCESS,
+                ]
+            );
 
             $handler->success($result);
 
@@ -187,11 +197,16 @@ class Payment implements Contracts\Payment
             ->setStatus(PaymentHistory::STATUS_FAIL)
             ->fill(compact('response'));
 
+        $paymentHistory->update(
+            [
+                'status' => PaymentHistory::STATUS_FAIL,
+                'data' => array_merge($paymentHistory->data ?? [], ['error' => $response->getMessage()]),
+            ]
+        );
+
         $handler->fail($result);
 
         event(new PaymentFail($result));
-
-        report($response->getMessage());
 
         return $result;
     }
@@ -215,7 +230,7 @@ class Payment implements Contracts\Payment
         return $result;
     }
 
-    protected function createGateway(Method $method): \Omnipay\Common\GatewayInterface
+    protected function createGateway(Method $method): GatewayInterface
     {
         $gateway = Omnipay::create($method->driver);
         $gateway->initialize($method->getConfigs());

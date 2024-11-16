@@ -173,6 +173,8 @@ class PaymentController extends APIController
 
         abort_if($paymentHistory == null, 404, __('Payment transaction not found!'));
 
+        abort_if($paymentHistory->status !== PaymentHistory::STATUS_PROCESSING, 400, __('Transaction has been processed!'));
+
         try {
             $payment = DB::transaction(fn () => Payment::complete($request, $paymentHistory));
         } catch (PaymentException $e) {

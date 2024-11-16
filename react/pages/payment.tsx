@@ -9,14 +9,16 @@ import { getMessageInError, showNotification } from "@larabiz/helpers/helper";
 export default function Payment({ page }: { page: string }) {
     const { transactionId } = useParams();
     const checkoutTheme = createTheme();
-    const query = new URLSearchParams(window.location.search);
     const pageName = page == 'complete' ? t('Complete') : t('Cancel');
 
     useEffect(() => {
-        if (query) {
+        if (window.location.search) {
+            const query = new URLSearchParams(window.location.search);
             const api = `/payment/ecommerce/` + page + `/` + transactionId;
+            const data = Object.fromEntries(query.entries());
+            console.log(data);
 
-            http.post(api).then((res) => {
+            http.post(api, data).then((res) => {
                 if (res.data.success === true) {
                     setTimeout(() => {
                         if (res.data.data.redirect_url) {
@@ -31,7 +33,7 @@ export default function Payment({ page }: { page: string }) {
                     showNotification(getMessageInError(res), 'error');
                 });
         }
-    }, [query]);
+    }, [window.location.search]);
 
     return (
         <ThemeProvider theme={checkoutTheme}>
