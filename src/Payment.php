@@ -163,14 +163,8 @@ class Payment implements Contracts\Payment
         return $result;
     }
 
-    public function complete(Request $request, string $transactionId): PaymentResult
+    public function complete(Request $request, PaymentHistory $paymentHistory): PaymentResult
     {
-        $paymentHistory = PaymentHistory::find($transactionId);
-
-        if (!$paymentHistory) {
-            throw PaymentException::transactionNotFound($transactionId);
-        }
-
         $module = $paymentHistory->module;
 
         $gateway = $this->createGateway($this->method($paymentHistory->payment_method));
@@ -202,10 +196,8 @@ class Payment implements Contracts\Payment
         return $result;
     }
 
-    public function cancel(Request $request, string $transactionId): PaymentResult
+    public function cancel(Request $request, PaymentHistory $paymentHistory): PaymentResult
     {
-        $paymentHistory = PaymentHistory::find($transactionId);
-
         $paymentHistory->update(
             [
                 'status' => PaymentHistory::STATUS_CANCEL,

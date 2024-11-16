@@ -17,6 +17,7 @@ use LarabizCMS\Core\Http\Controllers\APIController;
 use LarabizCMS\Modules\Payment\Exceptions\PaymentException;
 use LarabizCMS\Modules\Payment\Facades\Payment;
 use LarabizCMS\Modules\Payment\Http\Requests\PaymentRequest;
+use LarabizCMS\Modules\Payment\Models\PaymentHistory;
 use LarabizCMS\Modules\Payment\PaymentResult;
 use OpenApi\Annotations as OA;
 
@@ -101,7 +102,7 @@ class PaymentController extends APIController
             return $this->restSuccess(
                 [
                     'type' => 'redirect',
-                    'redirectUrl' => $payment->redirectUrl,
+                    'redirectUrl' => $payment->getRedirectUrl(),
                     'status' => $payment->status,
                     'module' => $module,
                 ],
@@ -114,7 +115,7 @@ class PaymentController extends APIController
 
     /**
      * @OA\Post(
-     *      path="/payment/{module}/complete",
+     *      path="/payment/{module}/complete/{transactionId}",
      *      tags={"Payment"},
      *      security={{"bearer": {}}},
      *      summary="Complete Payment",
@@ -168,8 +169,12 @@ class PaymentController extends APIController
      */
     public function complete(Request $request, string $module, string $transactionId): JsonResponse
     {
+        $paymentHistory = PaymentHistory::find($transactionId);
+
+        abort_if($paymentHistory == null, 404, __('Payment transaction not found!'));
+
         try {
-            $payment = DB::transaction(fn () => Payment::complete($request, $transactionId));
+            $payment = DB::transaction(fn () => Payment::complete($request, $paymentHistory));
         } catch (PaymentException $e) {
             return $this->restFail($e->getMessage());
         }
@@ -191,7 +196,7 @@ class PaymentController extends APIController
 
     /**
      * @OA\Post(
-     *      path="/payment/{module}/cancel",
+     *      path="/payment/{module}/cancel/{transactionId}",
      *      tags={"Payment"},
      *      security={{"bearer": {}}},
      *      summary="Cancel Payment",
@@ -245,8 +250,12 @@ class PaymentController extends APIController
      */
     public function cancel(Request $request, string $module, string $transactionId): JsonResponse
     {
+        $paymentHistory = PaymentHistory::find($transactionId);
+
+        abort_if($paymentHistory == null, 404, __('Payment transaction not found!'));
+
         try {
-            $payment = DB::transaction(fn () => Payment::cancel($request, $transactionId));
+            $payment = DB::transaction(fn () => Payment::cancel($request, $paymentHistory));
         } catch (PaymentException $e) {
             return $this->restFail($e->getMessage());
         }
@@ -257,6 +266,7 @@ class PaymentController extends APIController
                 'transaction_id' => $transactionId,
                 'status' => $payment->status,
                 'module' => $module,
+                'redirect_url' => $payment->getRedirectUrl(),
             ],
             __('Payment canceled!')
         );

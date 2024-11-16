@@ -1,18 +1,35 @@
 import PageContainer from "@larabiz/layouts/components/container/ThemePageContainer";
-import { Box, Card, CircularProgress, createTheme, CssBaseline, Grid, PaletteMode, Stack, ThemeProvider, Typography } from "@mui/material";
+import { Card, CircularProgress, createTheme, CssBaseline, Grid, Stack, ThemeProvider, Typography } from "@mui/material";
 import React, { useEffect } from "react";
-import getCheckoutTheme from "../../../ecommerce/react/pages/checkout/components/getCheckoutTheme";
 import { t } from "i18next";
+import { useParams } from "react-router-dom";
+import http from "@larabiz/http-common";
+import { getMessageInError, showNotification } from "@larabiz/helpers/helper";
 
 export default function Payment({ page }: { page: string }) {
-    const [mode, setMode] = React.useState<PaletteMode>('light');
-    const checkoutTheme = createTheme(getCheckoutTheme(mode));
+    const { transactionId } = useParams();
+    const checkoutTheme = createTheme();
     const query = new URLSearchParams(window.location.search);
     const pageName = page == 'complete' ? t('Complete') : t('Cancel');
 
     useEffect(() => {
         if (query) {
-            const api = `/payment/`;
+            const api = `/payment/ecommerce/` + page + `/` + transactionId;
+
+            http.post(api).then((res) => {
+                if (res.data.success === true) {
+                    setTimeout(() => {
+                        if (res.data.data.redirect_url) {
+                            window.location.href = res.data.data.redirect_url;
+                        } else {
+                            window.location.href = '/';
+                        }
+                    }, 500);
+                }
+            })
+                .catch((res: any) => {
+                    showNotification(getMessageInError(res), 'error');
+                });
         }
     }, [query]);
 

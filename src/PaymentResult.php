@@ -48,6 +48,11 @@ class PaymentResult
         return $this;
     }
 
+    public function getRedirectUrl(): ?string
+    {
+        return $this->redirectUrl;
+    }
+
     public function setIsRedirect(bool $isRedirect): static
     {
         $this->isRedirect = $isRedirect;
