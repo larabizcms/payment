@@ -33,7 +33,7 @@ class PurchaseResult
         $this->data = $data;
     }
 
-    public function getPaymentable(): Paymentable
+    public function getPaymentable(): ?Paymentable
     {
         return $this->paymentable;
     }
