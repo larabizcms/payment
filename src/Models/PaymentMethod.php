@@ -38,6 +38,8 @@ use LarabizCMS\Core\Models\Model;
  * @method static Builder|PaymentMethod whereType($value)
  * @method static Builder|PaymentMethod whereUpdatedAt($value)
  * @method static Builder active()
+ * @property string|null $description
+ * @method static Builder|PaymentMethod whereDescription($value)
  * @mixin Eloquent
  */
 class PaymentMethod extends Model
