@@ -126,7 +126,7 @@ class Payment implements Contracts\Payment
                 [
                     'status' => PaymentHistory::STATUS_SUCCESS,
                     'payment_id' => $response->getTransactionReference(),
-                    'data' => $response->getData(),
+                    'data' => $purchase->getData(),
                 ]
             );
             $paymentHistory->save();
@@ -146,7 +146,10 @@ class Payment implements Contracts\Payment
 
         if ($response->isRedirect()) {
             $paymentHistory->paymentable()->associate($purchase->getPaymentable());
-            $paymentHistory->fill(['payment_id' => $response->getTransactionReference()]);
+            $paymentHistory->fill([
+                'payment_id' => $response->getTransactionReference(),
+                'data' => $purchase->getData(),
+            ]);
             $paymentHistory->save();
 
             return $result->setIsRedirect(true)

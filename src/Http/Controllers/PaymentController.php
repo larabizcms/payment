@@ -101,7 +101,7 @@ class PaymentController extends APIController
             return $this->restSuccess(
                 [
                     'type' => 'redirect',
-                    'redirectUrl' => $payment->getRedirectUrl(),
+                    'redirect_url' => $payment->getRedirectUrl(),
                     'status' => $payment->status,
                     'module' => $module,
                 ],
@@ -168,14 +168,18 @@ class PaymentController extends APIController
      */
     public function complete(Request $request, string $module, string $transactionId): JsonResponse
     {
-        $paymentHistory = PaymentHistory::find($transactionId);
-
-        abort_if($paymentHistory == null, 404, __('Payment transaction not found!'));
-
-        abort_if($paymentHistory->status !== PaymentHistory::STATUS_PROCESSING, 400, __('Transaction has been processed!'));
-
         try {
-            $payment = DB::transaction(fn () => Payment::complete($request, $paymentHistory));
+            $payment = DB::transaction(
+                function () use ($request, $transactionId) {
+                    $paymentHistory = PaymentHistory::lockForUpdate()->find($transactionId);
+
+                    throw_if($paymentHistory == null, new PaymentException(__('Payment transaction not found!')));
+
+                    throw_if($paymentHistory->status !== PaymentHistory::STATUS_PROCESSING, new PaymentException(__('Transaction has been processed!')));
+
+                    return Payment::complete($request, $paymentHistory);
+                }
+            );
         } catch (PaymentException $e) {
             return $this->restFail($e->getMessage());
         }

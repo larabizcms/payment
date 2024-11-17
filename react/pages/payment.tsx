@@ -19,10 +19,10 @@ export default function Payment({ page }: { page: string }) {
 
     const redirectHandler = (res: any) => {
         if (res.success) {
-            window.location.href = '/admin-cp/profile?success=true';
+            window.location.href = '/admin-cp/profile?success=true'+ (page == 'complete' ? '&message='+ res.payload.message : '');
         } else {
             const error = getMessageInError(res.payload);
-            window.location.href = '/admin-cp/profile?success=false&error=' + error;
+            window.location.href = '/admin-cp/profile?success=false&message=' + error;
         }
     }
 
