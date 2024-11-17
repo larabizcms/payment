@@ -18,7 +18,7 @@ export default function Payment({ page }: { page: string }) {
     const { loading } = useSelector((state: RootState) => state.payment);
 
     const redirectHandler = (res: any) => {
-        if (res.success) {
+        if (res.payload?.success) {
             window.location.href = '/admin-cp/profile?success=true'+ (page == 'complete' ? '&message='+ res.payload.message : '');
         } else {
             const error = getMessageInError(res.payload);
