@@ -255,11 +255,11 @@ class PaymentController extends APIController
      */
     public function cancel(Request $request, string $module, string $transactionId): JsonResponse
     {
-        $paymentHistory = PaymentHistory::find($transactionId);
-
-        abort_if($paymentHistory == null, 404, __('Payment transaction not found!'));
-
         try {
+            $paymentHistory = PaymentHistory::lockForUpdate()->find($transactionId);
+
+            abort_if($paymentHistory == null, 404, __('Payment transaction not found!'));
+
             $payment = DB::transaction(fn () => Payment::cancel($request, $paymentHistory));
         } catch (PaymentException $e) {
             return $this->restFail($e->getMessage());
