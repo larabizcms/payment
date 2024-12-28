@@ -1,14 +1,14 @@
-import PageContainer from "@larabiz/layouts/components/container/ThemePageContainer";
+import PageContainer from "@admin/layouts/components/container/ThemePageContainer";
 import { createTheme, CssBaseline, ThemeProvider } from "@mui/material";
 import React, { useEffect } from "react";
 import { t } from "i18next";
 import { useParams } from "react-router-dom";
-import { getMessageInError } from "@larabiz/helpers/helper";
-import { useAppDispatch } from "@larabiz/hooks/hooks";
-import { cancel, complete } from "@larabiz/features/payment/payment/paymentActions";
+import { getMessageInError } from "@admin/helpers";
+import { useAppDispatch } from "@admin/hooks/hooks";
+import { cancel, complete } from "@admin/features/payment/payment/paymentActions";
 import { useSelector } from "react-redux";
 import { RootState } from "@local/store";
-import LoadingCenterPage from "@larabiz/layouts/components/LoadingCenterPage";
+import LoadingCenterPage from "@admin/layouts/components/LoadingCenterPage";
 
 export default function Payment({ page }: { page: string }) {
     const { module, transactionId } = useParams();
