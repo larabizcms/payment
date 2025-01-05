@@ -19,6 +19,12 @@ class PurchaseResult
 
     protected array $data = [];
 
+    protected array $returnQuery = [];
+
+    protected array $cancelQuery = [];
+
+    protected array $defaultQuery = [];
+
     public function __construct(
         protected string $transactionId,
         protected string $module,
@@ -31,6 +37,27 @@ class PurchaseResult
         $this->options = $options;
 
         $this->data = $data;
+    }
+
+    public function withReturnQuery(array $returnQuery): static
+    {
+        $this->returnQuery = $returnQuery;
+
+        return $this;
+    }
+
+    public function withCancelQuery(array $cancelQuery): static
+    {
+        $this->cancelQuery = $cancelQuery;
+
+        return $this;
+    }
+
+    public function withQueryString(array $defaultQuery): static
+    {
+        $this->defaultQuery = $defaultQuery;
+
+        return $this;
     }
 
     public function getPaymentable(): ?Paymentable
@@ -53,9 +80,12 @@ class PurchaseResult
 
     protected function getDefaultOptions(): array
     {
+        $returnQuery = array_merge($this->defaultQuery, $this->returnQuery);
+        $cancelQuery = array_merge($this->defaultQuery, $this->cancelQuery);
+
         return [
-            'returnUrl' => url("/payment/{$this->module}/complete/{$this->transactionId}"),
-            'cancelUrl' => url("/payment/{$this->module}/cancel/{$this->transactionId}"),
+            'returnUrl' => url("/payment/{$this->module}/complete/{$this->transactionId}", $returnQuery),
+            'cancelUrl' => url("/payment/{$this->module}/cancel/{$this->transactionId}", $cancelQuery),
         ];
     }
 }
