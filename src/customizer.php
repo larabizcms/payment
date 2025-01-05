@@ -9,4 +9,5 @@
 
 use LarabizCMS\Modules\Payment\Http\Controllers\Admin\TopupController;
 
-larabiz()->profilePage('balance', [TopupController::class, 'topup']);
+larabiz()->profilePage('balance', [TopupController::class, 'topup'])
+    ->menuIcon('AccountBalanceWallet');

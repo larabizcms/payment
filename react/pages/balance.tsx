@@ -2,28 +2,44 @@ import React from "react";
 import { Page } from "@admin/features/page/pageSlice";
 import { Grid, Icon } from "@mui/material";
 import { selectAuthUser } from "@admin/features/selectors";
-import { store } from "@local/store";
+import { RootState, store } from "@local/store";
 import { t } from "i18next";
 import { LoadingButton } from "@mui/lab";
 import Select from "@admin/components/forms/Select";
 import Text from "@admin/components/forms/Text";
 import { useForm } from "react-hook-form";
+import { purchase } from "@admin/features/payment/payment/paymentActions";
+import { useAppDispatch } from "@admin/hooks/hooks";
+import { useSelector } from "react-redux";
+import { getMessageInError, showNotification } from "@admin/helpers";
 
 type Props = {
     page?: Page,
     uri: string,
 };
 
+type PaymenFormData = FormData & {
+    amount: number,
+    method: string,
+};
+
 export default function Balance({ page, uri }: Props) {
     const user = selectAuthUser(store.getState());
-    const form = useForm<FormData>();
+    const form = useForm<PaymenFormData>();
     const { handleSubmit } = form;
-    const [loading, setLoading] = React.useState<boolean>(false);
+    const { loading } = useSelector((state: RootState) => state.payment);
+    const dispatch = useAppDispatch();
 
-    const submitForm = (data: FormData) => {
-        setLoading(true);
-
-
+    const submitForm = (data: PaymenFormData) => {
+        dispatch(purchase({ module: 'balance', ...data }))
+            .then((res) => {
+                if (res.payload?.success) {
+                    window.location.href = res.payload.data.redirect_url;
+                } else {
+                    const error = getMessageInError(res.payload);
+                    showNotification(error, 'error');
+                }
+            });
     };
 
     return (
@@ -58,7 +74,7 @@ export default function Balance({ page, uri }: Props) {
 
                         <Grid item xs={12}>
                             <LoadingButton
-                                //loading={loading}
+                                loading={loading}
                                 variant="contained"
                                 color="primary"
                                 type="submit"

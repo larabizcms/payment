@@ -3,6 +3,7 @@
 namespace LarabizCMS\Modules\Payment\Providers;
 
 use LarabizCMS\Core\Providers\ServiceProvider;
+use LarabizCMS\Modules\Payment\BalancePaymentHandler;
 use LarabizCMS\Modules\Payment\Contracts;
 use LarabizCMS\Modules\Payment\Payment;
 
@@ -30,6 +31,11 @@ class PaymentServiceProvider extends ServiceProvider
         // $this->registerViews();
         $this->loadMigrationsFrom(module_path($this->moduleName, 'database/migrations'));
         $this->loadCustomizer(__DIR__ . '/../customizer.php');
+
+        $this->app[Contracts\Payment::class]->registerModule(
+            'balance',
+            BalancePaymentHandler::class
+        );
     }
 
     /**
