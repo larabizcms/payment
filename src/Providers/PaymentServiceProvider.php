@@ -2,7 +2,7 @@
 
 namespace LarabizCMS\Modules\Payment\Providers;
 
-use Illuminate\Support\ServiceProvider;
+use LarabizCMS\Core\Providers\ServiceProvider;
 use LarabizCMS\Modules\Payment\Contracts;
 use LarabizCMS\Modules\Payment\Payment;
 
@@ -11,12 +11,12 @@ class PaymentServiceProvider extends ServiceProvider
     /**
      * @var string $moduleName
      */
-    protected $moduleName = 'Payment';
+    protected string $moduleName = 'Payment';
 
     /**
      * @var string $moduleNameLower
      */
-    protected $moduleNameLower = 'payment';
+    protected string $moduleNameLower = 'payment';
 
     /**
      * Boot the application events.
@@ -29,6 +29,7 @@ class PaymentServiceProvider extends ServiceProvider
         $this->registerConfig();
         // $this->registerViews();
         $this->loadMigrationsFrom(module_path($this->moduleName, 'database/migrations'));
+        $this->loadCustomizer(__DIR__ . '/../customizer.php');
     }
 
     /**

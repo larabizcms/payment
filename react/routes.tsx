@@ -10,7 +10,7 @@ const routes: RouteObject[] = [
     {
         path: "/payment/:module/cancel/:transactionId",
         element: <Payment page="cancel" />
-    }
+    },
 ];
 
 export default routes;
