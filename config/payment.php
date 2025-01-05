@@ -12,5 +12,13 @@ return [
             'label'     => 'PayPal / Visa / MasterCard',
             'description' => 'Secure payment via Paypal.',
         ],
+
+        'NganLuong' => [
+            'enabled'  => env('PAYMENT_NGANLUONG_ENABLED', false),
+            'merchantId' => env('PAYMENT_NGANLUONG_MERCHANT_ID'),
+            'merchantPassword' => env('PAYMENT_NGANLUONG_MERCHANT_PASSWORD'),
+            'receiverEmail' => env('PAYMENT_NGANLUONG_RECEIVER_EMAIL'),
+            'sandbox' => env('PAYMENT_NGANLUONG_SANDBOX', true),
+        ],
     ],
 ];

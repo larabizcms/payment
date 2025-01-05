@@ -5,7 +5,9 @@ namespace LarabizCMS\Modules\Payment\Providers;
 use LarabizCMS\Core\Providers\ServiceProvider;
 use LarabizCMS\Modules\Payment\BalancePaymentHandler;
 use LarabizCMS\Modules\Payment\Contracts;
+use LarabizCMS\Modules\Payment\Methods\Nganluong\Gateway;
 use LarabizCMS\Modules\Payment\Payment;
+use Omnipay\Omnipay;
 
 class PaymentServiceProvider extends ServiceProvider
 {
@@ -31,6 +33,8 @@ class PaymentServiceProvider extends ServiceProvider
         // $this->registerViews();
         $this->loadMigrationsFrom(module_path($this->moduleName, 'database/migrations'));
         $this->loadCustomizer(__DIR__ . '/../customizer.php');
+
+        class_alias(Gateway::class, 'Omnipay\\NganLuong\\Gateway');
 
         $this->app[Contracts\Payment::class]->registerModule(
             'balance',

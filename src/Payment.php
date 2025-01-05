@@ -237,6 +237,7 @@ class Payment implements Contracts\Payment
     protected function createGateway(Method $method): GatewayInterface
     {
         $gateway = Omnipay::create($method->driver);
+        //dd($method->getConfigs());
         $gateway->initialize($method->getConfigs());
         return $gateway;
     }
