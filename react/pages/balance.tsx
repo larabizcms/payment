@@ -27,19 +27,24 @@ export default function Balance({ page, uri }: Props) {
     const user = selectAuthUser(store.getState());
     const form = useForm<PaymenFormData>();
     const { handleSubmit } = form;
-    const { loading } = useSelector((state: RootState) => state.payment);
+    const [loading, setLoading] = React.useState(false);
     const dispatch = useAppDispatch();
 
     const submitForm = (data: PaymenFormData) => {
+        setLoading(true);
         dispatch(purchase({ module: 'balance', ...data }))
             .then((res) => {
                 if (res.payload?.success) {
                     // console.log(res.payload.data.redirect_url);
                     window.location.href = res.payload.data.redirect_url;
                 } else {
+                    setLoading(false);
                     const error = getMessageInError(res.payload);
                     showNotification(error, 'error');
                 }
+            }).catch((error) => {
+                showNotification(t('Something went wrong. Please try again...'), 'error');
+                setLoading(false);
             });
     };
 

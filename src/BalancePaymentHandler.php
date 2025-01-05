@@ -24,6 +24,7 @@ class BalancePaymentHandler extends BaseModuleHandler
 
         if ($amount % 5 !== 0) {
             $this->restFail(__('Amount must be a multiple of 5'))->send();
+            die;
         }
 
         return new PurchaseResult(
@@ -31,7 +32,7 @@ class BalancePaymentHandler extends BaseModuleHandler
             'balance',
             options: [
                 'amount' => $amount,
-                'description' => 'Topup balance account',
+                'description' => __('Topup balance account'),
                 'currency' => 'USD',
             ],
             data: [
