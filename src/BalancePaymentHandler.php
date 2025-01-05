@@ -36,7 +36,6 @@ class BalancePaymentHandler extends BaseModuleHandler
             ],
             data: [
                 'amount' => $amount,
-                'name' => $request->input('name'),
             ]
         );
     }
