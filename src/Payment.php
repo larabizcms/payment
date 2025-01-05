@@ -11,6 +11,7 @@ namespace LarabizCMS\Modules\Payment;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use LarabizCMS\Core\Models\Authenticatable;
 use LarabizCMS\Modules\Payment\Contracts\ModuleHandler;
 use LarabizCMS\Modules\Payment\Events\PaymentCancel;
 use LarabizCMS\Modules\Payment\Events\PaymentFail;
@@ -104,21 +105,16 @@ class Payment implements Contracts\Payment
         $handler = $this->getModule($module);
         $gateway = $this->createGateway($method);
 
-        $paymentHistory = new PaymentHistory(
-            [
-                'payment_method' => $method->name,
-                'status' => 'processing',
-                'module' => $module,
-            ]
-        );
-
-        $paymentHistory->payer()->associate($user);
-
-        $paymentHistory->save();
+        $paymentHistory = $this->createPaymentHistory($user, $module, $method);
 
         $purchase = $handler->purchase($request, $paymentHistory->id, $method);
 
-        $response = $gateway->purchase($purchase->getOptions())->send();
+        $response = $gateway->purchase(
+            array_merge(
+                $purchase->getOptions(),
+                ['order_code' => $paymentHistory->code]
+            )
+        )->send();
 
         if ($response->isSuccessful() && !$response->isRedirect()) {
             $paymentHistory->paymentable()->associate($purchase->getPaymentable());
@@ -234,10 +230,26 @@ class Payment implements Contracts\Payment
         return $result;
     }
 
+    protected function createPaymentHistory(Authenticatable $user, string $module, Method $method): PaymentHistory
+    {
+        $paymentHistory = new PaymentHistory(
+            [
+                'payment_method' => $method->name,
+                'status' => 'processing',
+                'module' => $module,
+            ]
+        );
+
+        $paymentHistory->payer()->associate($user);
+
+        $paymentHistory->save();
+
+        return $paymentHistory;
+    }
+
     protected function createGateway(Method $method): GatewayInterface
     {
         $gateway = Omnipay::create($method->driver);
-        //dd($method->getConfigs());
         $gateway->initialize($method->getConfigs());
         return $gateway;
     }

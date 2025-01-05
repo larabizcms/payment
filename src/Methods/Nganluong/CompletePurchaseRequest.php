@@ -49,4 +49,24 @@ class CompletePurchaseRequest extends AbstractRequest
 
         return $this->response = new CompletePurchaseResponse($this, $content);
     }
+
+    public function setMerchantId($value): static
+    {
+        return $this->setParameter('merchantId', $value);
+    }
+
+    public function getMerchantId()
+    {
+        return $this->getParameter('merchantId');
+    }
+
+    public function setMerchantPassword($value): static
+    {
+        return $this->setParameter('merchantPassword', $value);
+    }
+
+    public function getMerchantPassword()
+    {
+        return $this->getParameter('merchantPassword');
+    }
 }

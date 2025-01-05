@@ -17,9 +17,9 @@ class PurchaseRequest extends AbstractRequest
 
     public function getData(): array
     {
-        $this->validate('merchantId', 'merchantPassword', 'receiverEmail', 'amount', 'returnUrl');
+        $this->validate('merchantId', 'merchantPassword', 'receiverEmail', 'amount', 'returnUrl', 'orderCode');
 
-        $orderCode = '123';
+        $orderCode = $this->getOrderCode();
 
         $secureCode = md5($this->getParameter('merchantId')
             . ' '
@@ -77,7 +77,17 @@ class PurchaseRequest extends AbstractRequest
         return $this->getParameter('merchantId');
     }
 
-    public function setMerchantPassword($value)
+    public function setOrderCode($value): static
+    {
+        return $this->setParameter('orderCode', $value);
+    }
+
+    public function getOrderCode()
+    {
+        return $this->getParameter('orderCode');
+    }
+
+    public function setMerchantPassword($value): static
     {
         return $this->setParameter('merchantPassword', $value);
     }
@@ -87,7 +97,7 @@ class PurchaseRequest extends AbstractRequest
         return $this->getParameter('merchantPassword');
     }
 
-    public function setReceiverEmail($value)
+    public function setReceiverEmail($value): static
     {
         return $this->setParameter('receiverEmail', $value);
     }
@@ -97,7 +107,7 @@ class PurchaseRequest extends AbstractRequest
         return $this->getParameter('receiverEmail');
     }
 
-    public function setSandbox($value)
+    public function setSandbox($value): static
     {
         return $this->setParameter('sandbox', $value);
     }

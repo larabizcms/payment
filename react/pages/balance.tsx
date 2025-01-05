@@ -34,6 +34,7 @@ export default function Balance({ page, uri }: Props) {
         dispatch(purchase({ module: 'balance', ...data }))
             .then((res) => {
                 if (res.payload?.success) {
+                    // console.log(res.payload.data.redirect_url);
                     window.location.href = res.payload.data.redirect_url;
                 } else {
                     const error = getMessageInError(res.payload);
@@ -64,6 +65,7 @@ export default function Balance({ page, uri }: Props) {
                             options={
                                 {
                                     paypal: t("PayPal / Visa / Mastercard"),
+                                    NganLuong: t("Momo / Bank transfer (VN)"),
                                 }
                             }
                             config={{ rules: ['required'] }}
