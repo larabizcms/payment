@@ -19,6 +19,7 @@ return [
             'merchantPassword' => env('PAYMENT_NGANLUONG_MERCHANT_PASSWORD'),
             'receiverEmail' => env('PAYMENT_NGANLUONG_RECEIVER_EMAIL'),
             'sandbox' => env('PAYMENT_NGANLUONG_SANDBOX', true),
+            'label' => 'Momo / Bank Transfer (VN)',
         ],
     ],
 
