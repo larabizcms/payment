@@ -36,7 +36,7 @@ Route::group(
         'prefix' => 'payment',
     ],
     function () {
-        Route::get('{module}/methods', [MethodController::class, 'index']);
+        Route::get('methods', [MethodController::class, 'index']);
     }
 );
 

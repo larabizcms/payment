@@ -12,6 +12,8 @@ import { purchase } from "@admin/features/payment/payment/paymentActions";
 import { useAppDispatch } from "@admin/hooks/hooks";
 import { useSelector } from "react-redux";
 import { getMessageInError, showNotification } from "@admin/helpers";
+import { getPaymentMethods } from "@admin/features/payment/method/methodActions";
+import LoadingPage from "@admin/views/LoadingPage";
 
 type Props = {
     page?: Page,
@@ -29,6 +31,11 @@ export default function Balance({ page, uri }: Props) {
     const { handleSubmit } = form;
     const [loading, setLoading] = React.useState(false);
     const dispatch = useAppDispatch();
+    const methods = useSelector((state: RootState) => state.payment.methods);
+
+    React.useEffect(() => {
+        dispatch(getPaymentMethods({ module: 'balance' }));
+    }, [methods, dispatch]);
 
     const submitForm = (data: PaymenFormData) => {
         setLoading(true);
@@ -67,12 +74,13 @@ export default function Balance({ page, uri }: Props) {
                             label={t("Payment Method")}
                             name="method"
                             form={form as any}
-                            options={
-                                {
-                                    paypal: t("PayPal / Visa / Mastercard"),
-                                    NganLuong: t("Momo / Bank transfer (VN)"),
-                                }
-                            }
+                            // options={
+                            //     {
+                            //         paypal: t("PayPal / Visa / Mastercard"),
+                            //         NganLuong: t("Momo / Bank transfer (VN)"),
+                            //     }
+                            // }
+                            options={methods?.map((method) => ({ value: method.name, label: method.label }))}
                             config={{ rules: ['required'] }}
                             defaultValue={'paypal'}
                         />

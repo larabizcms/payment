@@ -14,6 +14,8 @@ use LarabizCMS\Core\DataTables\Components\Column;
 
 class PaymentHistoryDatatable extends DataTable
 {
+    protected bool $rowActionable = false;
+
     public function __construct(protected string $module)
     {
     }
@@ -23,7 +25,6 @@ class PaymentHistoryDatatable extends DataTable
         return [
 			Column::make('code'),
 			Column::make('payment_method'),
-			Column::make('payment_id'),
             Column::make('status')->format(Column::FORMAT_STATUS),
 			Column::make('created_at')
                 ->format(Column::FORMAT_DATETIME)

@@ -21,6 +21,8 @@ class PaymentHistoryResporce extends JsonResource
     {
         return [
             'id' => $this->resource->id,
+            'code' => $this->resource->code,
+            'payment_method' => $this->resource->payment_method,
             'amount' => $this->resource->amount,
             'status' => $this->resource->status,
             'created_at' => $this->resource->created_at->toDateTimeString(),

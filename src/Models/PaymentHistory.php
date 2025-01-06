@@ -27,6 +27,7 @@ class PaymentHistory extends Model
         'status',
         'data',
         'module',
+        'amount',
         'payer_type',
         'payer_id',
         'payment_id',
@@ -34,7 +35,10 @@ class PaymentHistory extends Model
         'paymentable_id',
     ];
 
-    protected $casts = ['data' => 'array', 'amount' => 'float'];
+    protected $casts = [
+        'data' => 'array',
+        'amount' => 'float',
+    ];
 
     public $sortable = [
         'created_at',
