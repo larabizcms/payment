@@ -1,0 +1,23 @@
+{
+    "Complete": "Complete",
+    "Cancel": "Cancel",
+    "Something went wrong. Please try again...": "Something went wrong. Please try again...",
+    "Available balance: ${{balance}}": "Available balance: ${{balance}}",
+    "Purchase balance": "Purchase balance",
+    "Amount": "Amount",
+    "Payment Method": "Payment Method",
+    "Add funds": "Add funds",
+    "Balance": "Balance",
+    "Payment Histories": "Payment Histories",
+    "Payment successful!": "Payment successful!",
+    "Payment transaction not found!": "Payment transaction not found!",
+    "Transaction has been processed!": "Transaction has been processed!",
+    "Payment canceled!": "Payment canceled!",
+    "Sorry, there was an error processing your payment. Please try again later.": "Sorry, there was an error processing your payment. Please try again later.",
+    "Get payment history successfully.": "Get payment history successfully.",
+    "Payment method :method not found": "Payment method :method not found",
+    "Transaction :transactionId not found": "Transaction :transactionId not found",
+    "Module :module not found": "Module :module not found",
+    "Amount must be a multiple of 5": "Amount must be a multiple of 5",
+    "Topup balance account": "Topup balance account"
+}
