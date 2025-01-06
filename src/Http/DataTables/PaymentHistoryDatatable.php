@@ -24,12 +24,8 @@ class PaymentHistoryDatatable extends DataTable
 			Column::make('code'),
 			Column::make('payment_method'),
 			Column::make('payment_id'),
-			Column::make('paymentable_type'),
-			Column::make('paymentable_id'),
             Column::make('status')->format(Column::FORMAT_STATUS),
 			Column::make('created_at')
-                ->disabledFlex()
-                ->width(200)
                 ->format(Column::FORMAT_DATETIME)
 		];
     }

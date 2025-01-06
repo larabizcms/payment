@@ -9,5 +9,12 @@
 
 use LarabizCMS\Modules\Payment\Http\Controllers\Admin\TopupController;
 
+larabiz()->adminMenuGroup('payment', 'Payment')->position(90);
+
 larabiz()->profilePage('balance', [TopupController::class, 'topup'])
     ->menuIcon('AccountBalanceWallet');
+
+larabiz()->adminMenu('payment/balance/histories', 'Payment Histories')
+    ->icon('History')
+    ->group('payment')
+    ->noPermission();
