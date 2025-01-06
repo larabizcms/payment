@@ -9,10 +9,12 @@
 
 namespace LarabizCMS\Modules\Payment\Http\Controllers\APIs;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use LarabizCMS\Core\Http\Controllers\APIController;
 use LarabizCMS\Modules\Payment\Facades\Payment;
+use LarabizCMS\Modules\Payment\Models\Enums\PaymentHistoryStatus;
 use LarabizCMS\Modules\Payment\Models\PaymentHistory;
 use OpenApi\Annotations as OA;
 
@@ -57,9 +59,16 @@ class PaymentHistoryController extends APIController
     public function index(Request $request, string $module): JsonResponse
     {
         Payment::getModule($module);
+        $user = $request->user();
 
         $results = PaymentHistory::api($request->all())
             ->where('module', $module)
+            ->when(
+                ! $user->can('payment_histories.index'),
+                fn (Builder $query) => $query->where('payer_id', $user->id)
+                    ->where('payer_type', $user->getMorphClass())
+                    ->where('status', '!=', PaymentHistoryStatus::PROCESSING)
+            )
             ->paginate($this->getQueryLimit($request));
 
         return $this->restSuccess($results, __('Get payment history successfully.'));

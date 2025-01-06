@@ -27,7 +27,10 @@ class PaymentHistoryController extends AdminController
     {
         Breadcrumb::add(__('Payment Histories'));
 
-        $page = Page::make()->template('crud-index')->params(['canCreate' => false]);
+        $page = Page::make()
+            ->template('crud-index')
+            ->params(['canCreate' => false])
+            ->noPermission();
 
         $page->fill(['title' => __('Payment Histories'), 'description' => __('Payment Histories')]);
 

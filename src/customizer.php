@@ -12,7 +12,8 @@ use LarabizCMS\Modules\Payment\Http\Controllers\Admin\TopupController;
 larabiz()->adminPage('balance', [TopupController::class, 'topup'])
     ->menuIcon('AccountBalanceWallet')
     ->menuGroup('account')
-    ->title('Balance');
+    ->title('Balance')
+    ->noPermission();
 
 larabiz()->adminMenu('payment/balance/histories', 'Topup Histories')
     ->icon('History')

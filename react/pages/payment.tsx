@@ -19,7 +19,7 @@ export default function Payment({ page }: { page: string }) {
 
     const redirectHandler = (res: any) => {
         if (res.payload?.success) {
-            window.location.href = '/admin-cp/profile/balance?success=true'+ (page == 'complete' ? '&message='+ res.payload.message : '');
+            window.location.href = '/admin-cp/balance?success=true'+ (page == 'complete' ? '&message='+ res.payload.message : '');
         } else {
             const error = getMessageInError(res.payload);
             window.location.href = '/admin-cp/profile?success=false&message=' + error;
@@ -27,7 +27,7 @@ export default function Payment({ page }: { page: string }) {
     }
 
     useEffect(() => {
-        if (window.location.search && transactionId && !loading) {
+        if (transactionId && !loading) {
             const query = new URLSearchParams(window.location.search);
 
             const data = {
