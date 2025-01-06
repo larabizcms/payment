@@ -7,7 +7,7 @@
  * @link       https://larabiz.com
  */
 
-namespace LarabizCMS\Modules\Payment\Http\Controllers;
+namespace LarabizCMS\Modules\Payment\Http\Controllers\APIs;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -18,12 +18,6 @@ use OpenApi\Annotations as OA;
 
 class PaymentHistoryController extends APIController
 {
-    public function __construct()
-    {
-        $this->middleware(['permission:payment-history.index', 'scopes:payment-history.all,payment-history.read'])
-            ->only(['index']);
-    }
-
     /**
      * @OA\Get(
      *      path="/payment/{module}/histories",
@@ -66,9 +60,7 @@ class PaymentHistoryController extends APIController
 
         $results = PaymentHistory::api($request->all())
             ->where('module', $module)
-            ->paginate(
-                $this->getQueryLimit($request)
-            );
+            ->paginate($this->getQueryLimit($request));
 
         return $this->restSuccess($results, __('Get payment history successfully.'));
     }

@@ -2,7 +2,7 @@
 
 use LarabizCMS\Modules\Payment\Http\Controllers\MethodController;
 use LarabizCMS\Modules\Payment\Http\Controllers\PaymentController;
-use LarabizCMS\Modules\Payment\Http\Controllers\PaymentHistoryController;
+use LarabizCMS\Modules\Payment\Http\Controllers\APIs\PaymentHistoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,9 +26,6 @@ Route::group(
         Route::post('{module}/purchase', [PaymentController::class, 'purchase']);
         Route::post('{module}/complete/{transactionId}', [PaymentController::class, 'complete']);
         Route::post('{module}/cancel/{transactionId}', [PaymentController::class, 'cancel']);
-
-        Route::resource('{module}/histories', PaymentHistoryController::class)
-            ->only(['index']);
     }
 );
 
@@ -38,5 +35,6 @@ Route::group(
     ],
     function () {
         Route::get('{module}/methods', [MethodController::class, 'index']);
+        Route::get('{module}/histories', [PaymentHistoryController::class, 'index']);
     }
 );

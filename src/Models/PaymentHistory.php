@@ -22,6 +22,7 @@ class PaymentHistory extends Model
     protected $table = 'payment_histories';
 
     protected $fillable = [
+        'code',
         'payment_method',
         'status',
         'data',

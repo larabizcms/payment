@@ -21,4 +21,9 @@ return [
             'sandbox' => env('PAYMENT_NGANLUONG_SANDBOX', true),
         ],
     ],
+
+    'repositories' => [
+        \LarabizCMS\Modules\Payment\Repositories\PaymentHistoryRepository::class =>
+        \LarabizCMS\Modules\Payment\Repositories\PaymentHistoryRepositoryEloquent::class
+    ],
 ];
