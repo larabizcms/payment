@@ -10,6 +10,7 @@
 namespace LarabizCMS\Modules\Payment\Http\Resporces;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use LarabizCMS\Modules\Payment\Facades\Payment;
 use LarabizCMS\Modules\Payment\Models\PaymentHistory;
 
 /**
@@ -19,10 +20,15 @@ class PaymentHistoryResporce extends JsonResource
 {
     public function toArray($request): array
     {
+        $methods = Payment::methods();
+
         return [
             'id' => $this->resource->id,
             'code' => $this->resource->code,
-            'payment_method' => $this->resource->payment_method,
+            'payment_method' => [
+                'name' => $this->resource->payment_method,
+                'label' => $methods[$this->resource->payment_method]->label,
+            ],
             'amount' => $this->resource->amount,
             'status' => $this->resource->status,
             'created_at' => $this->resource->created_at->toDateTimeString(),

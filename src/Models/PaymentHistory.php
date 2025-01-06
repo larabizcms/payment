@@ -43,6 +43,7 @@ class PaymentHistory extends Model
     ];
 
     public $sortable = [
+        'code',
         'created_at',
         'status',
         'payment_method',

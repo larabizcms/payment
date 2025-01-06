@@ -20,7 +20,7 @@ class Method implements Arrayable, \Stringable
     /**
      * @var string|null Label of method
      */
-    protected ?string $label = null;
+    public ?string $label = null;
 
     /**
      * @var string|null Description of method
