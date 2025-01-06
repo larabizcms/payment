@@ -19,7 +19,7 @@ class TopupController extends AdminController
     {
         $page->with(['title' => __('Balance'), 'description' => __('Balance')]);
 
-        $page->template('profile')->params(['template' => 'profile_balance']);
+        $page->template('balance');
 
         return $page;
     }
