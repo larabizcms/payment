@@ -9,6 +9,7 @@ use LarabizCMS\Core\Models\Model;
 use LarabizCMS\Core\Traits\HasAPI;
 use LarabizCMS\Core\Traits\HasCodeWithMonth;
 use LarabizCMS\Modules\Payment\Http\Resporces\PaymentHistoryResporce;
+use LarabizCMS\Modules\Payment\Models\Enums\PaymentHistoryStatus;
 
 class PaymentHistory extends Model
 {
@@ -38,6 +39,7 @@ class PaymentHistory extends Model
     protected $casts = [
         'data' => 'array',
         'amount' => 'float',
+        'status' => PaymentHistoryStatus::class,
     ];
 
     public $sortable = [

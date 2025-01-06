@@ -13,6 +13,7 @@ import { useAppDispatch } from "@admin/hooks/hooks";
 import { useSelector } from "react-redux";
 import { convertToSelectOptions, getMessageInError, showNotification } from "@admin/helpers";
 import { getPaymentMethods } from "@admin/features/payment/method/methodActions";
+import MainCard from "@admin/layouts/components/MainCard";
 
 type Props = {
     page?: Page,
@@ -61,39 +62,41 @@ export default function Balance({ page, uri }: Props) {
             <Grid item xs={12} md={9}>
                 <h4>{t('Available balance: ${{balance}}', { balance: user?.balance || 0 })}</h4>
 
-                <form noValidate onSubmit={handleSubmit(submitForm)}>
-                    <Grid container spacing={3}>
-                        <Text
-                            label={t("Amount")}
-                            name="amount"
-                            form={form as any}
-                            config={{ rules: ['required'] }}
-                            type="number"
-                        />
+                <MainCard title={t('Purchase balance')}>
+                    <form noValidate onSubmit={handleSubmit(submitForm)}>
+                        <Grid container spacing={3}>
+                            <Text
+                                label={t("Amount")}
+                                name="amount"
+                                form={form as any}
+                                config={{ rules: ['required'] }}
+                                type="number"
+                            />
 
-                        <Select
-                            label={t("Payment Method")}
-                            name="method"
-                            form={form as any}
-                            disabled={methods?.length === 0}
-                            options={methods ? convertToSelectOptions(methods, 'label', 'name') : undefined}
-                            config={{ rules: ['required'] }}
-                            defaultValue={'paypal'}
-                        />
+                            <Select
+                                label={t("Payment Method")}
+                                name="method"
+                                form={form as any}
+                                disabled={methods?.length === 0}
+                                options={methods ? convertToSelectOptions(methods, 'label', 'name') : undefined}
+                                config={{ rules: ['required'] }}
+                                defaultValue={'paypal'}
+                            />
 
-                        <br />
+                            <br />
 
-                        <Grid item xs={12}>
-                            <LoadingButton
-                                loading={loading}
-                                variant="contained"
-                                color="primary"
-                                type="submit"
-                                startIcon={<Icon>add</Icon>}
-                            >{t('Add funds')}</LoadingButton>
+                            <Grid item xs={12}>
+                                <LoadingButton
+                                    loading={loading}
+                                    variant="contained"
+                                    color="primary"
+                                    type="submit"
+                                    startIcon={<Icon>add</Icon>}
+                                >{t('Add funds')}</LoadingButton>
+                            </Grid>
                         </Grid>
-                    </Grid>
-                </form>
+                    </form>
+                </MainCard>
             </Grid>
         </Grid>
     );
