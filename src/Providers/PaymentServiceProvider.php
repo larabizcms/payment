@@ -34,7 +34,9 @@ class PaymentServiceProvider extends ServiceProvider
         $this->loadCustomizer(__DIR__ . '/../customizer.php');
         $this->bindingRepositories(config('payment.repositories'));
 
-        class_alias(Gateway::class, 'Omnipay\\NganLuong\\Gateway');
+        if (! class_exists('Omnipay\\NganLuong\\Gateway')) {
+            class_alias(Gateway::class, 'Omnipay\\NganLuong\\Gateway');
+        }
 
         $this->app[Contracts\Payment::class]->registerModule(
             'balance',
