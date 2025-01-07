@@ -1,0 +1,23 @@
+{
+    "Complete": "Hoàn thành",
+    "Cancel": "Hủy bỏ",
+    "Something went wrong. Please try again...": "Đã xảy ra lỗi. Vui lòng thử lại...",
+    "Available balance: ${{balance}}": "Số dư khả dụng: ${{balance}}",
+    "Purchase balance": "Số dư mua hàng",
+    "Amount": "Số lượng",
+    "Payment Method": "Phương thức thanh toán",
+    "Add funds": "Thêm tiền",
+    "Balance": "Sự cân bằng",
+    "Payment Histories": "Lịch sử thanh toán",
+    "Payment successful!": "Thanh toán thành công!",
+    "Payment transaction not found!": "Không tìm thấy giao dịch thanh toán!",
+    "Transaction has been processed!": "Giao dịch đã được xử lý!",
+    "Payment canceled!": "Đã hủy thanh toán!",
+    "Sorry, there was an error processing your payment. Please try again later.": "Rất tiếc, đã xảy ra lỗi khi xử lý khoản thanh toán của bạn. Vui lòng thử lại sau.",
+    "Get payment history successfully.": "Nhận lịch sử thanh toán thành công.",
+    "Payment method :method not found": "Phương thức thanh toán: không tìm thấy phương thức",
+    "Transaction :transactionId not found": "Giao dịch: không tìm thấy Id giao dịch",
+    "Module :module not found": "Mô-đun: không tìm thấy mô-đun",
+    "Amount must be a multiple of 5": "Số tiền phải là bội số của 5",
+    "Topup balance account": "Nạp tiền vào tài khoản số dư"
+}
