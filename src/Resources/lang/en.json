@@ -19,5 +19,6 @@
     "Transaction :transactionId not found": "Transaction :transactionId not found",
     "Module :module not found": "Module :module not found",
     "Amount must be a multiple of 5": "Amount must be a multiple of 5",
-    "Topup balance account": "Topup balance account"
+    "Topup balance account": "Topup balance account",
+    "Redirecting, please wait...": "Redirecting, please wait..."
 }

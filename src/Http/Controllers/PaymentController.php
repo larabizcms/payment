@@ -105,7 +105,7 @@ class PaymentController extends APIController
                     'status' => $payment->status,
                     'module' => $module,
                 ],
-                __('Redirecting...')
+                __('Redirecting, please wait...')
             );
         }
 
