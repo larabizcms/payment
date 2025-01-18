@@ -75,6 +75,8 @@ export default function Balance({ page, uri }: Props) {
                 <MainCard title={t('Purchase balance')}>
                     {paymentFormData && <PaymentForm {...paymentFormData}  />}
 
+                    {/* <iframe src="https://pay.payos.vn/embedded/1894f0ec95d44961899dad5c9d087412/success/" style={{ width: 300, height: 300 }} /> */}
+
                     {!paymentFormData && (
                         <form noValidate onSubmit={handleSubmit(submitForm)}>
                             <Grid container spacing={3}>

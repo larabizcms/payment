@@ -18,14 +18,23 @@ class BalancePaymentHandler extends BaseModuleHandler
 
     public function purchase(Request $request, string $transactionId, Method $method): PurchaseResult
     {
-        $request->validate(['amount' => ['required', 'numeric', 'min:5', 'bail']]);
+        $request->validate(
+            [
+                'amount' => [
+                    'required',
+                    'numeric',
+                    // 'min:5',
+                    'bail'
+                ]
+            ]
+        );
 
         $amount = $request->float('amount');
 
-        if ($amount % 5 !== 0) {
-            $this->restFail(__('Amount must be a multiple of 5'))->send();
-            die;
-        }
+        // if ($amount % 5 !== 0) {
+        //     $this->restFail(__('Amount must be a multiple of 5'))->send();
+        //     die;
+        // }
 
         return new PurchaseResult(
             $transactionId,

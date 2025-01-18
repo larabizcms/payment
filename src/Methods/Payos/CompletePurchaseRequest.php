@@ -27,7 +27,7 @@ class CompletePurchaseRequest extends AbstractRequest
     public function sendData($data): CompletePurchaseResponse
     {
         $response = $this->httpClient->request(
-            'POST',
+            'GET',
             str_replace('{id}', $data['id'], $this->endpoint),
             [
                 'x-client-id' => $this->httpRequest->get('code'),
