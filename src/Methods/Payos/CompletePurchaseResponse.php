@@ -20,10 +20,8 @@ class CompletePurchaseResponse extends AbstractResponse
      */
     public function isSuccessful(): bool
     {
-        return isset($this->data['code'])
-            && $this->data['code'] === '00'
-            && isset($this->data['data']['status'])
-            && $this->data['data']['status'] === 'PAID';
+        return isset($this->data['status'])
+            && $this->data['status'] === 'PAID';
     }
 
     /**

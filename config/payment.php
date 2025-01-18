@@ -28,6 +28,7 @@ return [
             'key' => env('PAYMENT_PAYOS_KEY'),
             'checksumKey' => env('PAYMENT_PAYOS_CHECKSUM_KEY'),
             'label' => 'Momo / Zalo Pay / Bank Transfer (VN)',
+            'webhook' => \LarabizCMS\Modules\Payment\Methods\Payos\Webhook::class,
         ],
     ],
 

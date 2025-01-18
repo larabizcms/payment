@@ -5,11 +5,15 @@ namespace LarabizCMS\Modules\Payment\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Http\Request;
 use LarabizCMS\Core\Models\Model;
 use LarabizCMS\Core\Traits\HasAPI;
 use LarabizCMS\Core\Traits\HasCodeWithMonth;
+use LarabizCMS\Modules\Payment\Exceptions\PaymentException;
+use LarabizCMS\Modules\Payment\Facades\Payment;
 use LarabizCMS\Modules\Payment\Http\Resporces\PaymentHistoryResporce;
 use LarabizCMS\Modules\Payment\Models\Enums\PaymentHistoryStatus;
+use LarabizCMS\Modules\Payment\PaymentResult;
 
 class PaymentHistory extends Model
 {
@@ -81,5 +85,15 @@ class PaymentHistory extends Model
         }
 
         return data_get($this->data, $key, $default);
+    }
+
+    public function complete(Request $request): PaymentResult
+    {
+        throw_if(
+            $this->status !== PaymentHistoryStatus::PROCESSING,
+            new PaymentException(__('Transaction has been processed!'))
+        );
+
+        return Payment::complete($request, $this);
     }
 }

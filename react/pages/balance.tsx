@@ -75,7 +75,7 @@ export default function Balance({ page, uri }: Props) {
                 <MainCard title={t('Purchase balance')}>
                     {paymentFormData && <PaymentForm {...paymentFormData}  />}
 
-                    {/* <iframe src="https://pay.payos.vn/embedded/1894f0ec95d44961899dad5c9d087412/success/" style={{ width: 300, height: 300 }} /> */}
+                    {/* <iframe src="https://pay.payos.vn/embedded/0a47cc80dd434b6fa1b493a4cd379dd9/?redirect_uri=https%3A%2F%2Fexactly-becoming-impala.ngrok-free.app%2Fpayment%2Fbalance%2Fcomplete%2F9dfeedad-b241-46cf-b84c-351bac148513" style={{ width: 300, height: 300 }} /> */}
 
                     {!paymentFormData && (
                         <form noValidate onSubmit={handleSubmit(submitForm)}>

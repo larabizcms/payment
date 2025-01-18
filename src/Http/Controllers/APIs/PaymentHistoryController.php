@@ -67,7 +67,7 @@ class PaymentHistoryController extends APIController
                 ! $user->can('payment_histories.index'),
                 fn (Builder $query) => $query->where('payer_id', $user->id)
                     ->where('payer_type', $user->getMorphClass())
-                    ->where('status', '!=', PaymentHistoryStatus::PROCESSING)
+                    //->where('status', '!=', PaymentHistoryStatus::PROCESSING)
             )
             ->paginate($this->getQueryLimit($request));
 

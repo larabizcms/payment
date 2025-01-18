@@ -36,6 +36,7 @@ Route::group(
         'prefix' => 'payment',
     ],
     function () {
+        Route::post('webhook/{method}', [PaymentController::class, 'webhook']);
         Route::get('methods', [MethodController::class, 'index']);
     }
 );

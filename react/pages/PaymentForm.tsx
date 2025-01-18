@@ -1,9 +1,7 @@
 import { getPaymentMethods } from "@admin/features/payment/method/methodActions";
-import { convertToSelectOptions, showNotification } from "@admin/helpers";
+import { showNotification } from "@admin/helpers";
 import { useAppDispatch } from "@admin/hooks/hooks";
 import { RootState } from "@local/store";
-import { LoadingButton } from "@mui/lab";
-import { Grid, Icon, Select, TextField } from "@mui/material";
 import { usePayOS } from "@payos/payos-checkout";
 import { t } from "i18next";
 import React, { useEffect } from "react";
@@ -20,7 +18,6 @@ export type PaymentFormProps = {
 export default function PaymentForm({ module, transaction, params }: PaymentFormProps) {
     const dispatch = useAppDispatch();
     const methods = useSelector((state: RootState) => state.payment.methods);
-    const [loading, setLoading] = React.useState(false);
 
     const [payOSConfig, setPayOSConfig] = useState({
         RETURN_URL: window.location.origin + '/payment/balance/complete/' + transaction.id,
@@ -28,7 +25,10 @@ export default function PaymentForm({ module, transaction, params }: PaymentForm
         CHECKOUT_URL: params.checkoutUrl,
         embedded: true,
         onSuccess: (event: any) => {
-            showNotification(t('Payment successful'), 'success');
+            showNotification(t('Payment successful'));
+            setTimeout(() => {
+                window.location.href = '/admin-cp/balance?success=true';
+            }, 500);
         },
     });
 

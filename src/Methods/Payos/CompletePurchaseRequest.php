@@ -10,33 +10,56 @@
 namespace LarabizCMS\Modules\Payment\Methods\Payos;
 
 use Omnipay\Common\Message\AbstractRequest;
+use PayOS\PayOS;
 
 class CompletePurchaseRequest extends AbstractRequest
 {
-    protected string $endpoint = 'https://api-merchant.payos.vn/v2/payment-requests/{id}';
-
     public function getData(): array
     {
-        $this->validate('code', 'id');
+        $this->validate('code');
+        $data = $this->getParameter('data');
+
+        $id = $this->getId() ?? $data['paymentLinkId'];
 
         return [
-            'id' => $this->httpRequest->get('id'),
+            'id' => $id,
         ];
     }
 
     public function sendData($data): CompletePurchaseResponse
     {
-        $response = $this->httpClient->request(
-            'GET',
-            str_replace('{id}', $data['id'], $this->endpoint),
-            [
-                'x-client-id' => $this->httpRequest->get('code'),
-                'x-api-key' => $this->httpRequest->get('key'),
-            ]
-        );
+        $payOSClientId = config('payment.methods.Payos.clientId');
+        $payOSApiKey = config('payment.methods.Payos.key');
+        $payOSChecksumKey = config('payment.methods.Payos.checksumKey');
 
-        $content = json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
+        $payOS = new PayOS($payOSClientId, $payOSApiKey, $payOSChecksumKey);
+        $paymentInfo = $payOS->getPaymentLinkInformation($data['id']);
 
-        return $this->response = new CompletePurchaseResponse($this, $content);
+        return $this->response = new CompletePurchaseResponse($this, $paymentInfo);
+    }
+
+    public function setCode($value): static
+    {
+        return $this->setParameter('code', $value);
+    }
+
+    public function getCode()
+    {
+        return $this->getParameter('code');
+    }
+
+    public function setId($value): static
+    {
+        return $this->setParameter('id', $value);
+    }
+
+    public function getId()
+    {
+        return $this->getParameter('id');
+    }
+
+    public function setData($value): static
+    {
+        return $this->setParameter('data', $value);
     }
 }

@@ -12,6 +12,7 @@ namespace LarabizCMS\Modules\Payment\Http\Controllers;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use LarabizCMS\Core\Http\Controllers\APIController;
 use LarabizCMS\Modules\Payment\Exceptions\PaymentException;
 use LarabizCMS\Modules\Payment\Facades\Payment;
@@ -189,9 +190,7 @@ class PaymentController extends APIController
 
                     throw_if($paymentHistory == null, new PaymentException(__('Payment transaction not found!')));
 
-                    throw_if($paymentHistory->status !== PaymentHistory::STATUS_PROCESSING, new PaymentException(__('Transaction has been processed!')));
-
-                    return Payment::complete($request, $paymentHistory);
+                    return $paymentHistory->complete($request);
                 }
             );
         } catch (PaymentException $e) {
@@ -288,6 +287,35 @@ class PaymentController extends APIController
             ],
             __('Payment canceled!')
         );
+    }
+
+    public function webhook(Request $request, string $method): JsonResponse
+    {
+        $webhook = config("payment.methods.{$method}.webhook");
+
+        if (! $webhook) {
+            Log::error("Webhook not found for {$method} payment method");
+
+            return response()->json(
+                [
+                    'success' => true,
+                ]
+            );
+        }
+
+        try {
+            $result = DB::transaction(fn () => app($webhook)->handle($request));
+
+            return response()->json($result);
+        } catch (PaymentException $e) {
+            report($e);
+            return response()->json(
+                [
+                    'success' => true,
+                    'message' => $e->getMessage(),
+                ]
+            );
+        }
     }
 
     protected function failResponse(PaymentResult $result): JsonResponse
