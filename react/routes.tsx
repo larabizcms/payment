@@ -1,7 +1,7 @@
 import React from "react";
 import { RouteObject } from "react-router-dom";
 import Payment from "./pages/payment";
-import Checkout from "./pages/components/PaymentForm";
+import Checkout from "./pages/PaymentForm";
 
 const routes: RouteObject[] = [
     {

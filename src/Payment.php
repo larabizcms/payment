@@ -9,6 +9,8 @@
 
 namespace LarabizCMS\Modules\Payment;
 
+use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\RequestException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use LarabizCMS\Core\Models\Authenticatable;
@@ -24,6 +26,113 @@ use Omnipay\Omnipay;
 class Payment implements Contracts\Payment
 {
     protected array $modules = [];
+
+    /**
+     * Create payment
+     *
+     * @param  Request  $request
+     * @param  string  $module
+     * @param  Method  $method
+     * @return PaymentResult
+     */
+    public function create(Request $request, string $module, Method $method): PaymentResult
+    {
+        $user = $request->user();
+        $handler = $this->getModule($module);
+        $gateway = $this->createGateway($method);
+
+        $paymentHistory = $this->createPaymentHistory($user, $module, $method);
+        $purchase = $handler->purchase($request, $paymentHistory->id, $method);
+
+        try {
+            $result = $this->gatewayPurchase($request, $purchase, $gateway, $paymentHistory);
+
+            if ($result->isSuccessful()) {
+                $handler->success($result);
+
+                event(new PaymentSuccess($result));
+            }
+
+            return $result;
+        } catch (\Throwable $e) {
+            report($e);
+            $result = PaymentResult::make($request, $paymentHistory)
+                ->setStatus(PaymentHistory::STATUS_FAIL)
+                ->setMessage($e->getMessage());
+
+            $paymentHistory->update(['status' => PaymentHistory::STATUS_FAIL, 'fail_message' => $e->getMessage()]);
+            event(new PaymentFail($result));
+
+            $handler->fail($result);
+
+            return $result;
+        }
+    }
+
+    public function complete(Request $request, PaymentHistory $paymentHistory): PaymentResult
+    {
+        $gateway = $this->createGateway($this->method($paymentHistory->payment_method));
+
+        $handler = $this->getModule($paymentHistory->module);
+
+        $params = $request->all();
+        $params['transactionReference'] = $paymentHistory->payment_id;
+        unset($params['token']);
+
+        $response = $gateway->completePurchase($params)->send();
+
+        if ($response->isSuccessful()) {
+            $result = PaymentResult::make($request, $paymentHistory)
+                ->setStatus(PaymentHistory::STATUS_SUCCESS)
+                ->fill(compact('response'));
+
+            $paymentHistory->update(
+                [
+                    'status' => PaymentHistory::STATUS_SUCCESS,
+                ]
+            );
+
+            $handler->success($result);
+
+            return $result;
+        }
+
+        $result = PaymentResult::make($request, $paymentHistory)
+            ->setStatus(PaymentHistory::STATUS_FAIL)
+            ->fill(compact('response'));
+
+        $paymentHistory->update(
+            [
+                'status' => PaymentHistory::STATUS_FAIL,
+                'data' => array_merge($paymentHistory->data ?? [], ['error' => $response->getMessage()]),
+            ]
+        );
+
+        $handler->fail($result);
+
+        event(new PaymentFail($result));
+
+        return $result;
+    }
+
+    public function cancel(Request $request, PaymentHistory $paymentHistory): PaymentResult
+    {
+        $paymentHistory->update(
+            [
+                'status' => PaymentHistory::STATUS_CANCEL,
+            ]
+        );
+
+        $handler = $this->getModule($paymentHistory->module);
+
+        $result = PaymentResult::make($request, $paymentHistory)->setStatus(PaymentHistory::STATUS_CANCEL);
+
+        event(new PaymentCancel($result));
+
+        $handler->cancel($result);
+
+        return $result;
+    }
 
     /**
      * Register module in payment
@@ -91,30 +200,15 @@ class Payment implements Contracts\Payment
         return $this->methods()[$method] ?? null;
     }
 
-    /**
-     * Create payment
-     *
-     * @param  Request  $request
-     * @param  string  $module
-     * @param  Method  $method
-     * @return PaymentResult
-     */
-    public function create(Request $request, string $module, Method $method): PaymentResult
-    {
-        $user = $request->user();
-        $handler = $this->getModule($module);
-        $gateway = $this->createGateway($method);
-
-        $paymentHistory = $this->createPaymentHistory($user, $module, $method);
-
-        $purchase = $handler->purchase($request, $paymentHistory->id, $method);
-
-        $response = $gateway->purchase(
-            array_merge(
-                $purchase->getOptions(),
-                ['order_code' => $paymentHistory->code]
-            )
-        )->send();
+    protected function gatewayPurchase(
+        Request $request,
+        PurchaseResult $purchase,
+        GatewayInterface $gateway,
+        PaymentHistory $paymentHistory
+    ): PaymentResult {
+        $options = $purchase->getOptions();
+        $options['order_code'] = $paymentHistory->code;
+        $response = $gateway->purchase($options)->send();
 
         if ($response->isSuccessful() && !$response->isRedirect()) {
             $paymentHistory->paymentable()->associate($purchase->getPaymentable());
@@ -127,105 +221,26 @@ class Payment implements Contracts\Payment
             );
             $paymentHistory->save();
 
-            $result = PaymentResult::make($request, $paymentHistory)
+            return PaymentResult::make($request, $paymentHistory)
                 ->setStatus(PaymentHistory::STATUS_SUCCESS)
                 ->fill(compact('response'));
-
-            $handler->success($result);
-
-            event(new PaymentSuccess($result));
-
-            return $result;
         }
 
-        $result = PaymentResult::make($request, $paymentHistory)->fill(compact('response'));
-
-        if ($response->isRedirect()) {
-            $paymentHistory->paymentable()->associate($purchase->getPaymentable());
-            $paymentHistory->fill([
+        $result = PaymentResult::make($request, $paymentHistory)
+            ->fill(compact('response'));
+        $paymentHistory->paymentable()->associate($purchase->getPaymentable());
+        $paymentHistory->fill(
+            [
                 'payment_id' => $response->getTransactionReference(),
                 'data' => $purchase->getData(),
-            ]);
-            $paymentHistory->save();
+            ]
+        );
+        $paymentHistory->save();
 
+        if ($response->isRedirect()) {
             return $result->setIsRedirect(true)
                 ->setRedirectUrl($response->getRedirectUrl());
         }
-
-        $result = PaymentResult::make($request, $paymentHistory)
-            ->setStatus(PaymentHistory::STATUS_FAIL)
-            ->fill(compact('response'));
-
-        event(new PaymentFail($result));
-
-        $handler->fail($result);
-
-        report($response->getMessage());
-
-        return $result;
-    }
-
-    public function complete(Request $request, PaymentHistory $paymentHistory): PaymentResult
-    {
-        $gateway = $this->createGateway($this->method($paymentHistory->payment_method));
-
-        $handler = $this->getModule($paymentHistory->module);
-
-        $params = $request->all();
-        $params['transactionReference'] = $paymentHistory->payment_id;
-        unset($params['token']);
-
-        $response = $gateway->completePurchase($params)->send();
-
-        if ($response->isSuccessful()) {
-            $result = PaymentResult::make($request, $paymentHistory)
-                ->setStatus(PaymentHistory::STATUS_SUCCESS)
-                ->fill(compact('response'));
-
-            $paymentHistory->update(
-                [
-                    'status' => PaymentHistory::STATUS_SUCCESS,
-                ]
-            );
-
-            $handler->success($result);
-
-            return $result;
-        }
-
-        $result = PaymentResult::make($request, $paymentHistory)
-            ->setStatus(PaymentHistory::STATUS_FAIL)
-            ->fill(compact('response'));
-
-        $paymentHistory->update(
-            [
-                'status' => PaymentHistory::STATUS_FAIL,
-                'data' => array_merge($paymentHistory->data ?? [], ['error' => $response->getMessage()]),
-            ]
-        );
-
-        $handler->fail($result);
-
-        event(new PaymentFail($result));
-
-        return $result;
-    }
-
-    public function cancel(Request $request, PaymentHistory $paymentHistory): PaymentResult
-    {
-        $paymentHistory->update(
-            [
-                'status' => PaymentHistory::STATUS_CANCEL,
-            ]
-        );
-
-        $handler = $this->getModule($paymentHistory->module);
-
-        $result = PaymentResult::make($request, $paymentHistory)->setStatus(PaymentHistory::STATUS_CANCEL);
-
-        event(new PaymentCancel($result));
-
-        $handler->cancel($result);
 
         return $result;
     }

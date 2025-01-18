@@ -16,6 +16,7 @@ use LarabizCMS\Core\Http\Controllers\APIController;
 use LarabizCMS\Modules\Payment\Exceptions\PaymentException;
 use LarabizCMS\Modules\Payment\Facades\Payment;
 use LarabizCMS\Modules\Payment\Http\Requests\PaymentRequest;
+use LarabizCMS\Modules\Payment\Http\Resporces\PaymentHistoryResporce;
 use LarabizCMS\Modules\Payment\Models\PaymentHistory;
 use LarabizCMS\Modules\Payment\PaymentResult;
 use OpenApi\Annotations as OA;
@@ -85,6 +86,10 @@ class PaymentController extends APIController
             return $this->restFail($e->getMessage());
         }
 
+        if ($payment->isFailed()) {
+            return $this->failResponse($payment);
+        }
+
         if ($payment->isSuccessful()) {
             return $this->restSuccess(
                 [
@@ -109,7 +114,16 @@ class PaymentController extends APIController
             );
         }
 
-        return $this->failResponse($payment);
+        return $this->restSuccess(
+            [
+                'type' => 'embed',
+                'status' => $payment->status,
+                'module' => $module,
+                'response' => $payment->getResponse()?->getData(),
+                'transaction' => PaymentHistoryResporce::make($payment->paymentHistory),
+            ],
+            __('Payment processing, please wait...')
+        );
     }
 
     /**
@@ -279,7 +293,7 @@ class PaymentController extends APIController
     protected function failResponse(PaymentResult $result): JsonResponse
     {
         return $this->restFail(
-            __('Sorry, there was an error processing your payment. Please try again later.')
+            $result->getMessage() ?? __('Sorry, there was an error processing your payment. Please try again later.')
         );
     }
 }

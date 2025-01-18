@@ -21,6 +21,18 @@ return [
             'sandbox' => env('PAYMENT_NGANLUONG_SANDBOX', true),
             'label' => 'Momo / Bank Transfer (VN)',
         ],
+
+        'Payos' => [
+            'enabled' => env('PAYMENT_PAYOS_ENABLED', false),
+            'clientId' => env('PAYMENT_PAYOS_CLIENT_ID'),
+            'key' => env('PAYMENT_PAYOS_KEY'),
+            'checksumKey' => env('PAYMENT_PAYOS_CHECKSUM_KEY'),
+            'label' => 'Momo / Zalo Pay / Bank Transfer (VN)',
+        ],
+    ],
+
+    'currency_conversion' => [
+        'VND' => 25400,
     ],
 
     'repositories' => [

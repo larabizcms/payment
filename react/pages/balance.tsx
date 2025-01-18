@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Page } from "@admin/features/page/pageSlice";
 import { Grid, Icon } from "@mui/material";
 import { selectAuthUser } from "@admin/features/selectors";
@@ -14,6 +14,7 @@ import { useSelector } from "react-redux";
 import { convertToSelectOptions, getMessageInError, showNotification } from "@admin/helpers";
 import { getPaymentMethods } from "@admin/features/payment/method/methodActions";
 import MainCard from "@admin/layouts/components/MainCard";
+import PaymentForm, { PaymentFormProps } from "./PaymentForm";
 
 type Props = {
     page?: Page,
@@ -32,6 +33,7 @@ export default function Balance({ page, uri }: Props) {
     const [loading, setLoading] = React.useState(false);
     const dispatch = useAppDispatch();
     const methods = useSelector((state: RootState) => state.payment.methods);
+    const [paymentFormData, setPaymentFormData] = useState<PaymentFormProps>();
 
     React.useEffect(() => {
         if (methods === null) {
@@ -39,13 +41,21 @@ export default function Balance({ page, uri }: Props) {
         }
     }, [methods, dispatch]);
 
+    const openPayment = (module: string, method: string, transaction: any, params?: any) => {
+        setPaymentFormData({ module, method, transaction, params });
+    };
+
     const submitForm = (data: PaymenFormData) => {
         setLoading(true);
         dispatch(purchase({ module: 'balance', ...data }))
             .then((res) => {
                 if (res.payload?.success) {
                     // console.log(res.payload.data.redirect_url);
-                    window.location.href = res.payload.data.redirect_url;
+                    if (res.payload.data.type === 'redirect') {
+                        window.location.href = res.payload.data.redirect_url;
+                    } else {
+                        openPayment('balance', data.method, res.payload.data.transaction, res.payload.data.response);
+                    }
                 } else {
                     setLoading(false);
                     const error = getMessageInError(res.payload);
@@ -63,39 +73,43 @@ export default function Balance({ page, uri }: Props) {
                 <h4>{t('Available balance: ${{balance}}', { balance: user?.balance || 0 })}</h4>
 
                 <MainCard title={t('Purchase balance')}>
-                    <form noValidate onSubmit={handleSubmit(submitForm)}>
-                        <Grid container spacing={3}>
-                            <Text
-                                label={t("Amount")}
-                                name="amount"
-                                form={form as any}
-                                config={{ rules: ['required'] }}
-                                type="number"
-                            />
+                    {paymentFormData && <PaymentForm {...paymentFormData}  />}
 
-                            <Select
-                                label={t("Payment Method")}
-                                name="method"
-                                form={form as any}
-                                disabled={methods?.length === 0}
-                                options={methods ? convertToSelectOptions(methods, 'label', 'name') : undefined}
-                                config={{ rules: ['required'] }}
-                                defaultValue={'paypal'}
-                            />
+                    {!paymentFormData && (
+                        <form noValidate onSubmit={handleSubmit(submitForm)}>
+                            <Grid container spacing={3}>
+                                <Text
+                                    label={t("Amount")}
+                                    name="amount"
+                                    form={form as any}
+                                    config={{ rules: ['required'] }}
+                                    type="number"
+                                />
 
-                            <br />
+                                <Select
+                                    label={t("Payment Method")}
+                                    name="method"
+                                    form={form as any}
+                                    disabled={methods?.length === 0}
+                                    options={methods ? convertToSelectOptions(methods, 'label', 'name') : undefined}
+                                    config={{ rules: ['required'] }}
+                                    defaultValue={'paypal'}
+                                />
 
-                            <Grid item xs={12}>
-                                <LoadingButton
-                                    loading={loading}
-                                    variant="contained"
-                                    color="primary"
-                                    type="submit"
-                                    startIcon={<Icon>add</Icon>}
-                                >{t('Add funds')}</LoadingButton>
+                                <br />
+
+                                <Grid item xs={12}>
+                                    <LoadingButton
+                                        loading={loading}
+                                        variant="contained"
+                                        color="primary"
+                                        type="submit"
+                                        startIcon={<Icon>add</Icon>}
+                                    >{t('Add funds')}</LoadingButton>
+                                </Grid>
                             </Grid>
-                        </Grid>
-                    </form>
+                        </form>
+                    )}
                 </MainCard>
             </Grid>
         </Grid>

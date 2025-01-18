@@ -34,6 +34,7 @@ class PaymentHistory extends Model
         'payment_id',
         'paymentable_type',
         'paymentable_id',
+        'fail_message',
     ];
 
     protected $casts = [

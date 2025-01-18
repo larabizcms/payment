@@ -29,6 +29,8 @@ class PaymentResult
 
     public ?ResponseInterface $response = null;
 
+    public ?string $message = null;
+
     public static function make(Request $request, PaymentHistory $paymentHistory): static
     {
         return new static($request, $paymentHistory);
@@ -77,9 +79,30 @@ class PaymentResult
         return $this;
     }
 
+    public function isFailed(): bool
+    {
+        return $this->status === PaymentHistory::STATUS_FAIL;
+    }
+
+    public function getResponse(): ?ResponseInterface
+    {
+        return $this->response;
+    }
+
     public function getMessage(): ?string
     {
-        return $this->response?->getMessage();
+        if ($this->message) {
+            return $this->message;
+        }
+
+        return ($this->message = $this->response?->getMessage());
+    }
+
+    public function setMessage(string $message): static
+    {
+        $this->message = $message;
+
+        return $this;
     }
 
     public function fill(array $params): static

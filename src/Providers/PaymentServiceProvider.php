@@ -5,7 +5,7 @@ namespace LarabizCMS\Modules\Payment\Providers;
 use LarabizCMS\Core\Providers\ServiceProvider;
 use LarabizCMS\Modules\Payment\BalancePaymentHandler;
 use LarabizCMS\Modules\Payment\Contracts;
-use LarabizCMS\Modules\Payment\Methods\Nganluong\Gateway;
+use LarabizCMS\Modules\Payment\Methods\Payos\Gateway;
 use LarabizCMS\Modules\Payment\Payment;
 
 class PaymentServiceProvider extends ServiceProvider
@@ -34,8 +34,8 @@ class PaymentServiceProvider extends ServiceProvider
         $this->loadCustomizer(__DIR__ . '/../customizer.php');
         $this->bindingRepositories(config('payment.repositories'));
 
-        if (! class_exists('Omnipay\\NganLuong\\Gateway')) {
-            class_alias(Gateway::class, 'Omnipay\\NganLuong\\Gateway');
+        if (! class_exists('Omnipay\\Payos\\Gateway')) {
+            class_alias(Gateway::class, 'Omnipay\\Payos\\Gateway');
         }
 
         $this->app[Contracts\Payment::class]->registerModule(
