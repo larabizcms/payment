@@ -23,7 +23,7 @@ class BalancePaymentHandler extends BaseModuleHandler
                 'amount' => [
                     'required',
                     'numeric',
-                    // 'min:5',
+                    'min:5',
                     'bail'
                 ]
             ]
@@ -31,10 +31,10 @@ class BalancePaymentHandler extends BaseModuleHandler
 
         $amount = $request->float('amount');
 
-        // if ($amount % 5 !== 0) {
-        //     $this->restFail(__('Amount must be a multiple of 5'))->send();
-        //     die;
-        // }
+        if ($amount % 5 !== 0) {
+            $this->restFail(__('Amount must be a multiple of 5'))->send();
+            die;
+        }
 
         return new PurchaseResult(
             $transactionId,
