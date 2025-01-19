@@ -70,7 +70,7 @@ export default function Balance({ page, uri }: Props) {
     return (
         <Grid container spacing={2}>
             <Grid item xs={12} md={9}>
-                <h4>{t('Available balance: ${{balance}}', { balance: user?.balance || 0 })}</h4>
+                <h4>{t('Available balance: ${{balance}}', { balance: Math.round((user?.balance || 0) * 100) / 100 })}</h4>
 
                 <MainCard title={t('Purchase balance')}>
                     {paymentFormData && <PaymentForm {...paymentFormData}  />}
