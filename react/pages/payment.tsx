@@ -25,14 +25,14 @@ export default function Payment({ page }: { page: string }) {
             }
 
             setTimeout(() => {
-                //window.location.href = redirectUrl + '?success=true';
-            }, 500)
+                window.location.href = redirectUrl + '?success=true';
+            }, 500);
         } else {
             const error = getMessageInError(res.payload);
             showNotification(error, 'error');
 
             setTimeout(() => {
-                //window.location.href = redirectUrl + '?success=false';
+                window.location.href = redirectUrl + '?success=false';
             }, 500);
         }
     }
