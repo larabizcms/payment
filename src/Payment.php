@@ -215,6 +215,7 @@ class Payment implements Contracts\Payment
             $paymentHistory->fill(
                 [
                     'status' => PaymentHistory::STATUS_SUCCESS,
+                    'amount' => $purchase->getAmount(),
                     'payment_id' => $response->getTransactionReference(),
                     'data' => $purchase->getData(),
                 ]
@@ -231,6 +232,7 @@ class Payment implements Contracts\Payment
         $paymentHistory->paymentable()->associate($purchase->getPaymentable());
         $paymentHistory->fill(
             [
+                'amount' => $purchase->getAmount(),
                 'payment_id' => $response->getTransactionReference(),
                 'data' => $purchase->getData(),
             ]

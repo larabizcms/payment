@@ -65,6 +65,11 @@ class PurchaseResult
         return $this->paymentable;
     }
 
+    public function getAmount(): float
+    {
+        return $this->options['amount'];
+    }
+
     public function getOptions(): array
     {
         return [

@@ -1,12 +1,8 @@
-import { getPaymentMethods } from "@admin/features/payment/method/methodActions";
 import { showNotification } from "@admin/helpers";
-import { useAppDispatch } from "@admin/hooks/hooks";
-import { RootState } from "@local/store";
 import { usePayOS } from "@payos/payos-checkout";
 import { t } from "i18next";
 import React, { useEffect } from "react";
 import { useState } from "react";
-import { useSelector } from "react-redux";
 
 export type PaymentFormProps = {
     transaction: any,
@@ -16,18 +12,15 @@ export type PaymentFormProps = {
 };
 
 export default function PaymentForm({ module, transaction, params }: PaymentFormProps) {
-    const dispatch = useAppDispatch();
-    const methods = useSelector((state: RootState) => state.payment.methods);
-
     const [payOSConfig, setPayOSConfig] = useState({
-        RETURN_URL: window.location.origin + '/payment/balance/complete/' + transaction.id,
+        RETURN_URL: window.location.origin + `/payment/${module}/complete/${transaction.id}`,
         ELEMENT_ID: "embedded-payment-container",
         CHECKOUT_URL: params.checkoutUrl,
         embedded: true,
         onSuccess: (event: any) => {
             showNotification(t('Payment successful'));
             setTimeout(() => {
-                window.location.href = '/admin-cp/balance?success=true';
+                window.location.reload();
             }, 500);
         },
     });
@@ -35,22 +28,14 @@ export default function PaymentForm({ module, transaction, params }: PaymentForm
     const { open, exit } = usePayOS(payOSConfig);
 
     useEffect(() => {
-        if (methods === null) {
-            dispatch(getPaymentMethods({ module: module }));
-        }
-    }, [methods, dispatch]);
-
-    useEffect(() => {
         if (payOSConfig.CHECKOUT_URL != null) {
-            console.log(payOSConfig);
-
             open();
         }
     }, [payOSConfig]);
 
     return (
         <>
-            {t("Add funds")}: ${transaction.amount}
+            {t("Total Amount")}: ${transaction.amount}
 
             {/* <Select
                 label={t("Payment Method")}

@@ -30,7 +30,7 @@ class PaymentHistoryResporce extends JsonResource
                 'name' => $this->resource->payment_method,
                 'label' => $methods[$this->resource->payment_method]->label ?? Str::title($this->resource->payment_method),
             ],
-            'amount' => $this->resource->data['amount'] ?? null,
+            'amount' => $this->resource->amount,
             'status' => $this->resource->status,
             'created_at' => $this->resource->created_at,
             'updated_at' => $this->resource->updated_at,
