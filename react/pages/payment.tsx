@@ -19,6 +19,7 @@ export default function Payment({ page }: { page: string }) {
 
     const redirectHandler = (res: any) => {
         let redirectUrl = res.payload?.data?.redirect_url ?? '/admin-cp/balance';
+
         if (res.payload?.success) {
             if (res.payload?.message) {
                 showNotification(res.payload.message, 'success');
@@ -57,7 +58,7 @@ export default function Payment({ page }: { page: string }) {
                     .catch(redirectHandler);
             }
         }
-    }, [module, transactionId]);
+    }, [module, transactionId, dispatch]);
 
     return (
         <ThemeProvider theme={checkoutTheme}>
