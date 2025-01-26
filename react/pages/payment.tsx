@@ -3,7 +3,7 @@ import { createTheme, CssBaseline, ThemeProvider } from "@mui/material";
 import React, { useEffect } from "react";
 import { t } from "i18next";
 import { useParams } from "react-router-dom";
-import { getMessageInError } from "@admin/helpers";
+import { getMessageInError, showNotification } from "@admin/helpers";
 import { useAppDispatch } from "@admin/hooks/hooks";
 import { cancel, complete } from "@admin/features/payment/payment/paymentActions";
 import { useSelector } from "react-redux";
@@ -18,11 +18,22 @@ export default function Payment({ page }: { page: string }) {
     const { loading } = useSelector((state: RootState) => state.payment);
 
     const redirectHandler = (res: any) => {
+        let redirectUrl = res.payload?.data?.redirect_url ?? '/admin-cp/balance';
         if (res.payload?.success) {
-            window.location.href = '/admin-cp/balance?success=true'+ (page == 'complete' ? '&message='+ res.payload.message : '');
+            if (res.payload?.message) {
+                showNotification(res.payload.message, 'success');
+            }
+
+            setTimeout(() => {
+                //window.location.href = redirectUrl + '?success=true';
+            }, 500)
         } else {
             const error = getMessageInError(res.payload);
-            window.location.href = '/admin-cp/profile?success=false&message=' + error;
+            showNotification(error, 'error');
+
+            setTimeout(() => {
+                //window.location.href = redirectUrl + '?success=false';
+            }, 500);
         }
     }
 

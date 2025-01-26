@@ -25,8 +25,6 @@ Route::group(
     ],
     function () {
         Route::post('{module}/purchase', [PaymentController::class, 'purchase']);
-        Route::post('{module}/complete/{transactionId}', [PaymentController::class, 'complete']);
-        Route::post('{module}/cancel/{transactionId}', [PaymentController::class, 'cancel']);
         Route::get('{module}/histories', [PaymentHistoryController::class, 'index']);
     }
 );
@@ -36,6 +34,10 @@ Route::group(
         'prefix' => 'payment',
     ],
     function () {
+        Route::post('{module}/guest-purchase', [PaymentController::class, 'guestPurchase'])
+            ->middleware([\LarabizCMS\Core\Http\Middleware\Captcha::class]);
+        Route::post('{module}/complete/{transactionId}', [PaymentController::class, 'complete']);
+        Route::post('{module}/cancel/{transactionId}', [PaymentController::class, 'cancel']);
         Route::post('webhook/{method}', [PaymentController::class, 'webhook']);
         Route::get('methods', [MethodController::class, 'index']);
     }

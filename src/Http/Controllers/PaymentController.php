@@ -9,13 +9,17 @@
 
 namespace LarabizCMS\Modules\Payment\Http\Controllers;
 
+use App\Models\User;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use LarabizCMS\Core\Http\Controllers\APIController;
 use LarabizCMS\Modules\Payment\Exceptions\PaymentException;
 use LarabizCMS\Modules\Payment\Facades\Payment;
+use LarabizCMS\Modules\Payment\Http\Requests\GuestPaymentRequest;
 use LarabizCMS\Modules\Payment\Http\Requests\PaymentRequest;
 use LarabizCMS\Modules\Payment\Http\Resporces\PaymentHistoryResporce;
 use LarabizCMS\Modules\Payment\Models\PaymentHistory;
@@ -129,6 +133,82 @@ class PaymentController extends APIController
 
     /**
      * @OA\Post(
+     *      path="/payment/{module}/guest-purchase",
+     *      tags={"Payment"},
+     *      security={{"bearer": {}}},
+     *      summary="Purchase Payment As Guest",
+     *      operationId="payment.guest-purchase",
+     *      @OA\Parameter(
+     *           name="module",
+     *           in="path",
+     *           required=true,
+     *           description="Payment module",
+     *           @OA\Schema(type="string")
+     *      ),
+     *      @OA\RequestBody(
+     *           required=true,
+     *           ref="#/components/requestBodies/PaymentRequest"
+     *       ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Success",
+     *          @OA\JsonContent(
+     *              @OA\Property(property="success", type="boolean", example="true"),
+     *              @OA\Property(property="message", type="string", example="Roles updated successfully"),
+     *              @OA\Property(
+     *                  property="data",
+     *                  type="object",
+     *                  @OA\Property(
+     *                      property="type",
+     *                      type="string",
+     *                      example="complete",
+     *                  ),
+     *                  @OA\Property(
+     *                       property="transaction_id",
+     *                       type="string",
+     *                       example="91c8f73b-6146-44d9-8a38-839acb945341",
+     *                   ),
+     *                   @OA\Property(
+     *                        property="status",
+     *                        type="string",
+     *                        example="success",
+     *                   ),
+     *                   @OA\Property(
+     *                         property="module",
+     *                         type="string",
+     *                    ),
+     *              )
+     *          )
+     *      ),
+     * )
+     */
+    public function guestPurchase(GuestPaymentRequest $request, string $module): JsonResponse
+    {
+        $password = Str::random(10);
+        $user = $request->user() ?: User::firstOrCreate(
+            [
+                'email' => $request->string('email'),
+            ],
+            [
+                'name' => $request->string('name'),
+                'password' => bcrypt($password),
+                'random_password' => $password,
+            ]
+        );
+
+        if ($user->wasRecentlyCreated) {
+            $user->markEmailAsVerified();
+
+            event(new Registered($user));
+        }
+
+        $request->setUserResolver(fn() => $user);
+
+        return $this->purchase($request, $module);
+    }
+
+    /**
+     * @OA\Post(
      *      path="/payment/{module}/complete/{transactionId}",
      *      tags={"Payment"},
      *      security={{"bearer": {}}},
@@ -201,9 +281,10 @@ class PaymentController extends APIController
             return $this->restSuccess(
                 [
                     'type' => 'complete',
+                    'module' => $module,
                     'transaction_id' => $transactionId,
                     'status' => $payment->status,
-                    'module' => $module,
+                    'redirect_url' => $payment->paymentHistory->getData('redirect_url'),
                 ],
                 __('Payment successful!')
             );
