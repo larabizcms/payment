@@ -20,5 +20,9 @@
     "Module :module not found": "Mô-đun: không tìm thấy mô-đun",
     "Amount must be a multiple of 5": "Số tiền phải là bội số của 5",
     "Topup balance account": "Nạp tiền vào tài khoản số dư",
-    "Redirecting, please wait...": "Đang chuyển hướng, vui lòng đợi..."
+    "Redirecting, please wait...": "Đang chuyển hướng, vui lòng đợi...",
+    "Payment successful": "Thanh toán thành công",
+    "Total Amount": "Tổng số tiền",
+    "Pay Now": "Thanh toán ngay",
+    "Payment processing, please wait...": "Xử lý thanh toán, vui lòng đợi ..."
 }

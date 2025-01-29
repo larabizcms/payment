@@ -20,5 +20,9 @@
     "Module :module not found": "Module :module not found",
     "Amount must be a multiple of 5": "Amount must be a multiple of 5",
     "Topup balance account": "Topup balance account",
-    "Redirecting, please wait...": "Redirecting, please wait..."
+    "Redirecting, please wait...": "Redirecting, please wait...",
+    "Payment successful": "Payment successful",
+    "Total Amount": "Total Amount",
+    "Pay Now": "Pay Now",
+    "Payment processing, please wait...": "Payment processing, please wait..."
 }
