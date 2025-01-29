@@ -18,7 +18,7 @@ export default function Payment({ page }: { page: string }) {
     const { loading } = useSelector((state: RootState) => state.payment);
 
     const redirectHandler = (res: any) => {
-        let redirectUrl = res.payload?.data?.redirect_url ?? '/admin-cp/balance';
+        let redirectUrl = res.payload?.data?.redirect_url ?? '/client/balance';
 
         if (res.payload?.success) {
             if (res.payload?.message) {

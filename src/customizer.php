@@ -13,9 +13,9 @@ larabiz()->adminPage('balance', [TopupController::class, 'topup'])
     ->menuIcon('AccountBalanceWallet')
     ->menuGroup('account')
     ->title('Add funds')
-    ->noPermission();
+    ->forClient();
 
 larabiz()->adminMenu('payment/balance/histories', 'Topup Histories')
     ->icon('History')
     ->group('account')
-    ->noPermission();
+    ->forClient();

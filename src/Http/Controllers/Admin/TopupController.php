@@ -19,7 +19,7 @@ class TopupController extends AdminController
     {
         $page->with(['title' => __('Balance'), 'description' => __('Balance')]);
 
-        $page->template('balance')->noPermission();
+        $page->template('balance')->forClient();
 
         return $page;
     }

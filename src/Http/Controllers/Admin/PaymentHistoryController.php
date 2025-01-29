@@ -30,7 +30,7 @@ class PaymentHistoryController extends AdminController
         $page = Page::make()
             ->template('crud-index')
             ->params(['canCreate' => false])
-            ->noPermission();
+            ->forClient();
 
         $page->fill(['title' => __('Payment Histories'), 'description' => __('Payment Histories')]);
 
