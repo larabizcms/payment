@@ -24,6 +24,8 @@ class PaymentHistory extends Model
     public const STATUS_FAIL = 'fail';
     public const STATUS_CANCEL = 'cancel';
 
+    public static bool $randomSubfix = true;
+
     protected $table = 'payment_histories';
 
     protected $fillable = [
