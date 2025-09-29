@@ -24,7 +24,7 @@ class PurchaseRequest extends AbstractRequest
         return [
             'orderCode' => $orderCode,
             'amount' => $amount,
-            'quantity' => 1,
+            // 'quantity' => 1,
             'items' => [
                 [
                     'name' => $this->getDescription(),
