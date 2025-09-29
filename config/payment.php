@@ -33,7 +33,7 @@ return [
     ],
 
     'currency_conversion' => [
-        'VND' => 26600,
+        'VND' => 26700,
     ],
 
     'repositories' => [
